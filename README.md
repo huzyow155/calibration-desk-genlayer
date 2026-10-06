@@ -2,6 +2,8 @@
 
 Production dApp frontend for `CalibrationLedger`, an on-chain forecaster calibration evaluator powered by GenLayer's Intelligent Contracts.
 
+**Live Demo**: https://calibration-desk-genlayer.vercel.app
+
 ## Overview
 
 Accuracy alone rewards the wrong behavior: a forecaster who predicts "whatever is most likely" looks superficially accurate but provides little informative value, whereas a well-calibrated forecaster (right ~70% of the times they assign 70% probability) provides valuable probabilistic intelligence.

@@ -60,13 +60,60 @@
 .entrance-reveal {
   opacity: 0;
   transform: translateY(18px);
-  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-property: opacity, transform;
+  transition-duration: 0.7s;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--card-delay, 0ms);
 }
 
 .entrance-reveal.revealed {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* Landing Page Scoped Light Theme Backgrounds & Elements */
+.landing-light-stage {
+  background-color: #f0eee8;
+  color: #1a1a1c;
+  background-image: 
+    radial-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.6), rgba(240, 238, 232, 0.95));
+  background-size: 24px 24px, 100% 100%;
+}
+
+/* Subtle dotted/glitch accent treatment */
+.glitch-accent-word {
+  position: relative;
+  display: inline-block;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  letter-spacing: 0.08em;
+  background: linear-gradient(135deg, #111827 0%, #4b5563 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  border-bottom: 2px dashed rgba(0, 0, 0, 0.35);
+  padding-bottom: 2px;
+}
+
+@keyframes subtleGlitch {
+  0%, 100% {
+    transform: translate(0);
+    filter: drop-shadow(0 0 0 rgba(0,0,0,0));
+  }
+  20% {
+    transform: translate(-1px, 1px);
+    filter: drop-shadow(1px 0 0 rgba(239, 68, 68, 0.3));
+  }
+  40% {
+    transform: translate(1px, -1px);
+    filter: drop-shadow(-1px 0 0 rgba(59, 130, 246, 0.3));
+  }
+  60% {
+    transform: translate(0, 0);
+  }
+}
+
+.glitch-accent-word:hover {
+  animation: subtleGlitch 0.4s ease-in-out infinite alternate;
 }
 
 /* Respect user's motion preferences */

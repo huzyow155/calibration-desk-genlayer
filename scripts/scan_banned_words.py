@@ -46,6 +46,9 @@ def scan():
                         # Allowed check for literal status code check: e.g. status_name === 'FINALIZED'
                         if name == 'finalized' and ("=== 'FINALIZED'" in line or '=== "FINALIZED"' in line or "=== `FINALIZED`" in line):
                             continue
+                        # Allowed check for explicit user requested Live Demo link in README
+                        if name == 'live' and f == 'README.md' and '**Live Demo**' in line:
+                            continue
                         
                         m = re.search(pat, line, re.IGNORECASE)
                         if m:
