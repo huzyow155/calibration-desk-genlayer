@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-dark: #0b0c0e;
+    --card-bg: rgba(18, 20, 24, 0.88);
+    --edge-subtle: rgba(255, 255, 255, 0.10);
+    --edge-highlight: rgba(255, 255, 255, 0.20);
+  }
+
+  body {
+    background-color: var(--bg-dark);
+    color: #eef0f2;
+    min-height: 100vh;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+}
+
+/* Rigid-Aspect Glass Metric Cards */
+.glass-metric-card {
+  aspect-ratio: 429 / 554;
+  position: relative;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.3s ease,
+              box-shadow 0.35s ease;
+}
+
+@media (min-width: 768px) {
+  .glass-metric-card:hover {
+    transform: translateY(-4px);
+  }
+}
+
+/* Card Diagonal Sheen Effect */
+.card-sheen-sweep {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.14) 0%,
+    rgba(255, 255, 255, 0.04) 38%,
+    transparent 65%
+  );
+}
+
+/* Card SVG Grain Overlay using Procedural SVG Data URI */
+.card-grain-overlay {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+}
+
+/* LED Dot Matrix Styles */
+.dot-matrix-active {
+  transition: fill 0.25s ease, filter 0.25s ease;
+}
+
+.dot-matrix-dim {
+  transition: fill 0.25s ease;
+}
+
+/* One-Shot Entrance Choreography */
+.entrance-reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.entrance-reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .entrance-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .glass-metric-card {
+    transition: none !important;
+  }
+
+  .glass-metric-card:hover {
+    transform: none !important;
+  }
+}
