@@ -10,7 +10,6 @@ interface MetricGlassCardProps {
   metricUnit: string;
   caption: string;
   detailPoints: string[];
-  accentColor?: string;
   variant?: 'rose' | 'purple' | 'amber';
   onLearnMore?: () => void;
 }
@@ -23,96 +22,68 @@ export const MetricGlassCard: React.FC<MetricGlassCardProps> = ({
   metricUnit,
   caption,
   detailPoints,
-  accentColor = '#ffffff',
   variant = 'rose',
   onLearnMore,
 }) => {
-  // Theme gradients & styling variants matching colorful translucent aesthetic
-  const variantStyles = {
+  // Edge-to-edge vivid gradients and glass styling matching reference image
+  const variantConfig = {
     rose: {
-      cardBg: 'bg-gradient-to-br from-[#ffdde1]/90 via-[#ee9ca7]/80 to-[#ff758c]/85 border-[#f43f5e]/30 shadow-rose-950/15',
-      badgeBg: 'border-rose-900/20 bg-rose-950/10 text-rose-950',
-      badgeDot: 'bg-rose-600',
-      cardNum: 'text-rose-900/60',
-      titleColor: 'text-stone-900 group-hover:text-black',
-      dotContainer: 'border-rose-950/20 bg-stone-950/85 shadow-inner',
-      metricLabel: 'text-rose-200/80',
-      metricUnitColor: 'text-rose-200',
-      captionColor: 'text-stone-900/80 group-hover:text-stone-950',
-      detailColor: 'text-stone-800/85',
-      bulletColor: 'text-rose-800',
-      divider: 'border-rose-950/15',
-      pillBtn: 'border-rose-900/20 bg-stone-900 text-stone-100 hover:bg-black hover:text-white hover:border-stone-900 shadow-md',
+      gradient: 'linear-gradient(145deg, #f43f5e 0%, #e11d48 45%, #9f1239 100%)',
+      borderColor: 'rgba(255, 255, 255, 0.28)',
+      shadow: '0 20px 45px -12px rgba(159, 18, 57, 0.45)',
     },
     purple: {
-      cardBg: 'bg-gradient-to-br from-[#e0c3fc]/90 via-[#8ec5fc]/75 to-[#a18cd1]/85 border-[#8b5cf6]/30 shadow-purple-950/15',
-      badgeBg: 'border-purple-900/20 bg-purple-950/10 text-purple-950',
-      badgeDot: 'bg-purple-600',
-      cardNum: 'text-purple-900/60',
-      titleColor: 'text-stone-900 group-hover:text-black',
-      dotContainer: 'border-purple-950/20 bg-stone-950/85 shadow-inner',
-      metricLabel: 'text-purple-200/80',
-      metricUnitColor: 'text-purple-200',
-      captionColor: 'text-stone-900/80 group-hover:text-stone-950',
-      detailColor: 'text-stone-800/85',
-      bulletColor: 'text-purple-800',
-      divider: 'border-purple-950/15',
-      pillBtn: 'border-purple-900/20 bg-stone-900 text-stone-100 hover:bg-black hover:text-white hover:border-stone-900 shadow-md',
+      gradient: 'linear-gradient(145deg, #8b5cf6 0%, #7c3aed 45%, #4c1d95 100%)',
+      borderColor: 'rgba(255, 255, 255, 0.28)',
+      shadow: '0 20px 45px -12px rgba(76, 29, 149, 0.45)',
     },
     amber: {
-      cardBg: 'bg-gradient-to-br from-[#ffd194]/90 via-[#f7bb97]/80 to-[#f6a064]/85 border-[#f59e0b]/30 shadow-amber-950/15',
-      badgeBg: 'border-amber-900/20 bg-amber-950/10 text-amber-950',
-      badgeDot: 'bg-amber-600',
-      cardNum: 'text-amber-900/60',
-      titleColor: 'text-stone-900 group-hover:text-black',
-      dotContainer: 'border-amber-950/20 bg-stone-950/85 shadow-inner',
-      metricLabel: 'text-amber-200/80',
-      metricUnitColor: 'text-amber-200',
-      captionColor: 'text-stone-900/80 group-hover:text-stone-950',
-      detailColor: 'text-stone-800/85',
-      bulletColor: 'text-amber-800',
-      divider: 'border-amber-950/15',
-      pillBtn: 'border-amber-900/20 bg-stone-900 text-stone-100 hover:bg-black hover:text-white hover:border-stone-900 shadow-md',
+      gradient: 'linear-gradient(145deg, #f59e0b 0%, #ea580c 45%, #9a3412 100%)',
+      borderColor: 'rgba(255, 255, 255, 0.28)',
+      shadow: '0 20px 45px -12px rgba(154, 52, 18, 0.45)',
     },
   }[variant];
 
   return (
     <div
-      className={`glass-metric-card entrance-reveal group relative overflow-hidden rounded-[28px] border p-7 sm:p-8 backdrop-blur-2xl transition-all duration-300 hover:scale-[1.015] hover:shadow-2xl ${variantStyles.cardBg}`}
+      className="glass-metric-card entrance-reveal group relative overflow-hidden rounded-[28px] border p-7 sm:p-8 backdrop-blur-2xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 hover:shadow-2xl flex flex-col justify-between"
       style={
         {
+          background: variantConfig.gradient,
+          borderColor: variantConfig.borderColor,
+          boxShadow: variantConfig.shadow,
           '--card-delay': `${cardIndex * 150}ms`,
         } as React.CSSProperties
       }
     >
-      {/* SVG Turbulence Grain Overlay */}
-      <div className="card-grain-overlay pointer-events-none absolute inset-0 opacity-[0.06] mix-blend-multiply" />
+      {/* SVG Turbulence Grain Overlay inside Card */}
+      <div className="card-grain-overlay pointer-events-none absolute inset-0 opacity-[0.06] mix-blend-overlay" />
 
       {/* Diagonal Sheen (CSS ::before) */}
-      <div className="card-sheen-sweep pointer-events-none absolute inset-0 opacity-50 transition-opacity duration-500 group-hover:opacity-85" />
+      <div className="card-sheen-sweep pointer-events-none absolute inset-0 opacity-40 transition-opacity duration-500 group-hover:opacity-75" />
 
-      {/* Internal Content Container: Rigid Structure */}
+      {/* Internal Content Container */}
       <div className="relative z-10 flex h-full flex-col justify-between space-y-6">
         {/* Card Header */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold tracking-wide uppercase ${variantStyles.badgeBg}`}>
-              <span className={`h-1.5 w-1.5 rounded-full animate-pulse ${variantStyles.badgeDot}`} />
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/30 bg-white/20 px-3 py-1 text-[11px] font-semibold tracking-wide uppercase text-white shadow-sm backdrop-blur-md transition-colors duration-300 group-hover:bg-white/30">
+              <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
               {badge}
             </span>
-            <span className={`text-xs font-mono font-semibold ${variantStyles.cardNum}`}>
+            <span className="text-xs font-mono font-semibold text-white/80">
               CARD_0{cardIndex + 1}
             </span>
           </div>
 
-          <h3 className={`text-2xl sm:text-3xl font-extrabold tracking-tight transition-transform duration-300 group-hover:scale-[1.02] ${variantStyles.titleColor}`}>
+          <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white/95 transition-all duration-300 group-hover:text-white group-hover:scale-[1.02] origin-left">
             {title}
           </h3>
         </div>
 
-        {/* LED-Dot Matrix Metric Stage */}
-        <div className={`rounded-2xl border p-5 transition-transform duration-300 group-hover:shadow-lg ${variantStyles.dotContainer}`}>
-          <div className={`mb-2 text-[10px] font-mono tracking-widest uppercase ${variantStyles.metricLabel}`}>
+        {/* LED-Dot Matrix Metric Inset Panel */}
+        <div className="rounded-2xl border border-black/40 bg-black/55 p-5 shadow-2xl backdrop-blur-md transition-shadow duration-300 group-hover:shadow-inner">
+          <div className="mb-2 text-[10px] font-mono font-semibold tracking-widest text-white/70 uppercase">
             VERIFIED METRIC // ON-CHAIN
           </div>
           
@@ -120,10 +91,10 @@ export const MetricGlassCard: React.FC<MetricGlassCardProps> = ({
             <DotMatrix
               value={metricValue}
               size="lg"
-              color={accentColor}
-              className="drop-shadow-[0_0_12px_rgba(255,255,255,0.4)]"
+              color="#ffffff"
+              className="drop-shadow-[0_0_14px_rgba(255,255,255,0.7)]"
             />
-            <span className={`text-xs font-mono font-bold uppercase tracking-wider ${variantStyles.metricUnitColor}`}>
+            <span className="text-xs font-mono font-bold uppercase tracking-wider text-white/90">
               {metricUnit}
             </span>
           </div>
@@ -131,29 +102,29 @@ export const MetricGlassCard: React.FC<MetricGlassCardProps> = ({
 
         {/* Caption & Explanatory Breakdown */}
         <div className="space-y-4">
-          <p className={`text-base leading-relaxed font-normal transition-opacity duration-300 ${variantStyles.captionColor}`}>
+          <p className="text-base leading-relaxed font-normal text-white/90 transition-opacity duration-300 group-hover:text-white group-hover:opacity-100">
             {caption}
           </p>
 
-          <div className={`space-y-2 border-t pt-4 ${variantStyles.divider}`}>
+          <div className="space-y-2 border-t border-white/20 pt-4">
             {detailPoints.map((point, idx) => (
-              <div key={idx} className={`flex items-start gap-2 text-xs font-medium ${variantStyles.detailColor}`}>
-                <span className={`font-mono mt-0.5 ${variantStyles.bulletColor}`}>•</span>
-                <span className="leading-snug">{point}</span>
+              <div key={idx} className="flex items-start gap-2 text-xs font-medium text-white/90 leading-snug">
+                <span className="font-mono mt-0.5 text-white/70">•</span>
+                <span>{point}</span>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Learn More Pill Button */}
+        {/* Rounded White Pill Learn More Button */}
         <div className="pt-2">
           <button
             onClick={onLearnMore}
             type="button"
-            className={`w-full inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-xs font-semibold uppercase tracking-wider transition-all duration-200 cursor-pointer ${variantStyles.pillBtn}`}
+            className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-xs font-bold uppercase tracking-wider text-stone-900 shadow-lg shadow-black/15 transition-all duration-200 hover:bg-stone-50 hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] cursor-pointer"
           >
             <span>Learn More</span>
-            <ArrowUpRight className="h-3.5 w-3.5" />
+            <ArrowUpRight className="h-4 w-4 text-stone-900" />
           </button>
         </div>
       </div>

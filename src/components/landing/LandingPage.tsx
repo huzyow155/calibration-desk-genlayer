@@ -16,8 +16,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchWorkbench }) =
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            entry.target.classList.add('revealed');
-            observer.unobserve(entry.target);
+            const target = entry.target as HTMLElement;
+            observer.unobserve(target);
+            // Delay adding .revealed via double requestAnimationFrame + small delay
+            // so the browser guarantees painting the initial opacity: 0 frame first
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                setTimeout(() => {
+                  target.classList.add('revealed');
+                }, 50);
+              });
+            });
           }
         });
       },
@@ -34,6 +43,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchWorkbench }) =
 
   return (
     <div className="landing-light-stage relative min-h-screen overflow-hidden py-12 sm:py-20 transition-colors">
+      {/* Background paper texture & fine grid overlay */}
+      <div className="paper-grain-overlay pointer-events-none absolute inset-0 -z-10" />
+
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-20 sm:space-y-28">
         {/* Two-Column Hero Section matching reference style */}
         <section className="entrance-reveal space-y-8 pt-4">
@@ -78,8 +90,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchWorkbench }) =
         </section>
 
         {/* 3 Real Metric Cards Section */}
-        <section className="entrance-reveal space-y-8">
-          <div className="space-y-2">
+        <section className="space-y-8">
+          <div className="entrance-reveal space-y-2">
             <span className="text-xs font-mono font-bold tracking-widest text-stone-500 uppercase">
               MECHANISM HIGHLIGHTS // THREE EMPIRICAL PILLARS
             </span>
@@ -89,7 +101,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchWorkbench }) =
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 pt-2">
-            {/* Card 1: Quadratic Penalty (The Trap Case) - Rose Variant */}
+            {/* Card 1: Quadratic Penalty (The Trap Case) - Full Rose/Pink Gradient */}
             <MetricGlassCard
               cardIndex={0}
               title="Quadratic Penalty"
@@ -102,12 +114,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchWorkbench }) =
                 'Forecaster B (calibrated 9000 bp): 9 hits (0.0100 each) + 1 miss (0.8100 penalty) = 0.0900 Brier score.',
                 'Forecaster B scores superiorly because Brier score penalizes false certainty quadratically.',
               ]}
-              accentColor="#f43f5e"
               variant="rose"
               onLearnMore={scrollToDeepDive}
             />
 
-            {/* Card 2: Zero Capital At Risk - Purple Variant */}
+            {/* Card 2: Zero Capital At Risk - Full Violet/Purple Gradient */}
             <MetricGlassCard
               cardIndex={1}
               title="Zero Capital At Risk"
@@ -120,12 +131,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchWorkbench }) =
                 'CalibrationLedger isolates forecaster skill from wallet balance.',
                 'Multi-validator LLM consensus checks verbatim quotations in submitted evidence.',
               ]}
-              accentColor="#8b5cf6"
               variant="purple"
               onLearnMore={scrollToDeepDive}
             />
 
-            {/* Card 3: Decile Buckets - Amber Variant */}
+            {/* Card 3: Decile Buckets - Full Amber/Orange Gradient */}
             <MetricGlassCard
               cardIndex={2}
               title="Decile Calibration"
@@ -138,7 +148,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchWorkbench }) =
                 'A well-calibrated forecaster hits ~70% of the events they label 70% likely.',
                 'Calculated fresh on demand from stored predictions with zero aggregation drift.',
               ]}
-              accentColor="#f59e0b"
               variant="amber"
               onLearnMore={scrollToDeepDive}
             />
@@ -147,7 +156,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchWorkbench }) =
 
         {/* Mechanism Deep-Dive & Comparison */}
         <div ref={deepDiveRef}>
-          <section className="entrance-reveal rounded-3xl border border-stone-300/80 bg-white/80 p-8 sm:p-12 shadow-xl shadow-stone-900/5 backdrop-blur-xl space-y-8">
+          <section className="entrance-reveal rounded-3xl border border-stone-300/80 bg-white/85 p-8 sm:p-12 shadow-xl shadow-stone-900/5 backdrop-blur-xl space-y-8">
             <div className="max-w-3xl space-y-3">
               <span className="text-xs font-mono font-bold tracking-widest text-stone-500 uppercase">
                 THE CALIBRATION DISCOVERY
