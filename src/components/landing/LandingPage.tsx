@@ -10,31 +10,20 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchWorkbench }) =
   const deepDiveRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Reveal animation observer respecting prefers-reduced-motion
-    const elements = document.querySelectorAll<HTMLElement>('.entrance-reveal');
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const target = entry.target as HTMLElement;
-            observer.unobserve(target);
-            // Delay adding .revealed via double requestAnimationFrame + small delay
-            // so the browser guarantees painting the initial opacity: 0 frame first
-            requestAnimationFrame(() => {
-              requestAnimationFrame(() => {
-                setTimeout(() => {
-                  target.classList.add('revealed');
-                }, 50);
-              });
-            });
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-    elements.forEach((el) => observer.observe(el));
-
-    return () => observer.disconnect();
+    // Respect prefers-reduced-motion, otherwise cleanup entrance-active on last card animation end
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.documentElement.classList.remove('entrance-active');
+    } else {
+      const target = document.querySelector('.metric-card--connections .learn-more-btn');
+      target?.addEventListener(
+        'animationend',
+        () => {
+          clearTimeout((window as any).__entranceFailsafe);
+          document.documentElement.classList.remove('entrance-active');
+        },
+        { once: true }
+      );
+    }
   }, []);
 
   const scrollToDeepDive = () => {
@@ -42,66 +31,78 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchWorkbench }) =
   };
 
   return (
-    <div className="landing-light-stage relative min-h-screen overflow-hidden py-12 sm:py-20 transition-colors">
-      {/* Background paper texture & fine grid overlay */}
-      <div className="paper-grain-overlay pointer-events-none absolute inset-0 -z-10" />
+    <div className="stage-paper relative min-h-screen overflow-hidden py-12 sm:py-20 transition-colors">
+      {/* SVG filter definitions for card grain and paper noise */}
+      <svg className="filter-defs" style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }} aria-hidden="true">
+        <defs>
+          <filter id="cardNoise">
+            <feTurbulence type="fractalNoise" baseFrequency=".54" numOctaves="3" seed="27" stitchTiles="stitch" />
+            <feColorMatrix type="saturate" values="0" />
+            <feComponentTransfer>
+              <feFuncR type="linear" slope="1.8" intercept="-.25" />
+              <feFuncG type="linear" slope="1.8" intercept="-.25" />
+              <feFuncB type="linear" slope="1.8" intercept="-.25" />
+              <feFuncA type="table" tableValues="0 .52" />
+            </feComponentTransfer>
+          </filter>
+        </defs>
+      </svg>
+
+      {/* Clean microscopic paper texture overlay (NO grid lines) */}
+      <div className="paper-grain-texture" aria-hidden="true" />
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-20 sm:space-y-28">
-        {/* Two-Column Hero Section matching reference style */}
-        <section className="entrance-reveal space-y-8 pt-4">
-          <div className="inline-flex items-center gap-2 rounded-full border border-stone-300/80 bg-white/70 px-4 py-1.5 text-xs font-semibold text-stone-800 shadow-sm backdrop-blur-md">
-            <Sparkles className="h-3.5 w-3.5 text-stone-700" />
-            <span>GenLayer Studionet Preview // Autonomous Intelligent Adjudication</span>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-            {/* Left Column: Bold Headline with Dotted Glitch Accent */}
-            <div className="lg:col-span-7 space-y-4">
-              <h1 className="text-5xl sm:text-7xl lg:text-8xl font-black tracking-tight text-stone-900 leading-[1.04]">
-                Calibration Over{' '}
-                <span className="glitch-accent-word" title="Accuracy glitch metric">
-                  Accuracy
-                </span>
-                <span className="block text-stone-600 font-extrabold text-3xl sm:text-5xl lg:text-6xl mt-2 tracking-tight">
-                  Catching Overconfidence On-Chain
-                </span>
-              </h1>
+        {/* Masthead Header matching Reference 2-column layout */}
+        <header className="masthead-grid pt-2">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-stone-300/80 bg-white/70 px-4 py-1.5 text-xs font-medium text-stone-700 shadow-sm backdrop-blur-md mb-4">
+              <Sparkles className="h-3.5 w-3.5 text-stone-600" />
+              <span>GenLayer Studionet Preview // Autonomous Intelligent Adjudication</span>
             </div>
 
-            {/* Right Column: Supporting narrative and Launch CTA */}
-            <div className="lg:col-span-5 space-y-6 pt-2 lg:pt-3">
-              <p className="text-lg sm:text-xl text-stone-700 leading-relaxed font-normal">
-                Rewarding raw accuracy incentivizes claiming 99% certainty on the favorite.
-                CalibrationLedger scores forecasters with proper Brier scoring and on-chain decile calibration
-                histograms, penalizing overconfident misjudgments quadratically through multi-validator LLM consensus.
-              </p>
+            <h1 className="headline-text">
+              <span className="headline-line">
+                Calibration Over
+                <span className="dot-accent-word">Accuracy</span>
+              </span>
+              <span className="headline-line text-stone-600 font-normal text-2xl sm:text-4xl mt-1 tracking-tight">
+                Catching Overconfidence On-Chain
+              </span>
+            </h1>
+          </div>
 
-              <div className="pt-2">
-                <button
-                  onClick={onLaunchWorkbench}
-                  className="inline-flex items-center gap-3 rounded-full bg-stone-950 px-8 py-4 text-base font-semibold text-stone-50 shadow-xl shadow-stone-950/20 transition-all duration-200 hover:scale-[1.02] hover:bg-black hover:shadow-2xl active:scale-[0.98] cursor-pointer"
-                >
-                  <span>Launch Calibration Desk</span>
-                  <ArrowRight className="h-4 w-4" />
-                </button>
-              </div>
+          <div className="space-y-6 pt-2">
+            <p className="hero-intro">
+              Rewarding raw accuracy incentivizes claiming 99% certainty on the favorite.
+              CalibrationLedger scores forecasters with proper Brier scoring and on-chain decile calibration
+              histograms, penalizing overconfident misjudgments quadratically through multi-validator LLM consensus.
+            </p>
+
+            <div>
+              <button
+                onClick={onLaunchWorkbench}
+                className="inline-flex items-center gap-3 rounded-full bg-stone-900 px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-stone-900/15 transition-all duration-200 hover:scale-[1.02] hover:bg-black hover:shadow-xl active:scale-[0.98] cursor-pointer"
+              >
+                <span>Launch Calibration Desk</span>
+                <ArrowRight className="h-4 w-4" />
+              </button>
             </div>
           </div>
-        </section>
+        </header>
 
         {/* 3 Real Metric Cards Section */}
-        <section className="space-y-8">
-          <div className="entrance-reveal space-y-2">
-            <span className="text-xs font-mono font-bold tracking-widest text-stone-500 uppercase">
+        <section className="space-y-8" aria-label="Performance capabilities">
+          <div className="space-y-1">
+            <span className="text-xs font-mono font-semibold tracking-widest text-stone-500 uppercase">
               MECHANISM HIGHLIGHTS // THREE EMPIRICAL PILLARS
             </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-stone-900">
+            <h2 className="text-2xl sm:text-3xl font-normal text-stone-900">
               Why Quadratic Scoring Changes Behavior
             </h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 pt-2">
-            {/* Card 1: Quadratic Penalty (The Trap Case) - Full Rose/Pink Gradient */}
+            {/* Card 1: Quadratic Penalty (The Trap Case) - Speed/Rose/Berry Layered Gradient */}
             <MetricGlassCard
               cardIndex={0}
               title="Quadratic Penalty"
@@ -118,7 +119,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchWorkbench }) =
               onLearnMore={scrollToDeepDive}
             />
 
-            {/* Card 2: Zero Capital At Risk - Full Violet/Purple Gradient */}
+            {/* Card 2: Zero Capital At Risk - Context/Violet-Plum Layered Gradient */}
             <MetricGlassCard
               cardIndex={1}
               title="Zero Capital At Risk"
@@ -135,7 +136,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchWorkbench }) =
               onLearnMore={scrollToDeepDive}
             />
 
-            {/* Card 3: Decile Buckets - Full Amber/Orange Gradient */}
+            {/* Card 3: Decile Buckets - Connections/Amber-Terracotta Layered Gradient */}
             <MetricGlassCard
               cardIndex={2}
               title="Decile Calibration"
@@ -156,15 +157,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchWorkbench }) =
 
         {/* Mechanism Deep-Dive & Comparison */}
         <div ref={deepDiveRef}>
-          <section className="entrance-reveal rounded-3xl border border-stone-300/80 bg-white/85 p-8 sm:p-12 shadow-xl shadow-stone-900/5 backdrop-blur-xl space-y-8">
+          <section className="rounded-3xl border border-stone-300/80 bg-white/85 p-8 sm:p-12 shadow-xl shadow-stone-900/5 backdrop-blur-xl space-y-8">
             <div className="max-w-3xl space-y-3">
-              <span className="text-xs font-mono font-bold tracking-widest text-stone-500 uppercase">
+              <span className="text-xs font-mono font-semibold tracking-widest text-stone-500 uppercase">
                 THE CALIBRATION DISCOVERY
               </span>
-              <h3 className="text-3xl sm:text-4xl font-extrabold text-stone-900">
+              <h3 className="text-2xl sm:text-3xl font-semibold text-stone-900">
                 Accuracy vs. Calibration: The Core Distinction
               </h3>
-              <p className="text-stone-700 text-base sm:text-lg leading-relaxed font-normal">
+              <p className="text-stone-700 text-base leading-relaxed font-normal">
                 In high-stakes decisions, a weather forecaster who predicts "70% chance of rain" is informative
                 even when it doesn't rain, provided that across 100 similar forecasts it rains roughly 70 times.
                 Binary markets fail to measure this nuance:
@@ -172,24 +173,24 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchWorkbench }) =
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-              <div className="rounded-2xl border border-rose-300 bg-rose-50/70 p-6 space-y-3 shadow-sm">
-                <div className="flex items-center gap-2 text-rose-800 font-bold text-sm">
+              <div className="rounded-2xl border border-rose-300/80 bg-rose-50/70 p-6 space-y-3 shadow-sm">
+                <div className="flex items-center gap-2 text-rose-800 font-semibold text-sm">
                   <Scale className="h-4 w-4" />
                   <span>The Naive Accuracy Metric</span>
                 </div>
-                <p className="text-sm sm:text-base text-stone-800 leading-relaxed font-normal">
+                <p className="text-sm text-stone-800 leading-relaxed font-normal">
                   Rewards always claiming maximal confidence on the most likely outcome. Forecasters who assign
                   99% probability on every favored horse look "90% accurate" when 9 win, but convey toxic certainty
                   and offer zero probability calibration.
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-emerald-300 bg-emerald-50/70 p-6 space-y-3 shadow-sm">
-                <div className="flex items-center gap-2 text-emerald-800 font-bold text-sm">
+              <div className="rounded-2xl border border-emerald-300/80 bg-emerald-50/70 p-6 space-y-3 shadow-sm">
+                <div className="flex items-center gap-2 text-emerald-800 font-semibold text-sm">
                   <BarChart3 className="h-4 w-4" />
                   <span>Proper Brier Calibration</span>
                 </div>
-                <p className="text-sm sm:text-base text-stone-800 leading-relaxed font-normal">
+                <p className="text-sm text-stone-800 leading-relaxed font-normal">
                   Applies a quadratic penalty: $(p - outcome)^2$. A single incorrect 9900 bp claim inflicts an
                   immense 0.9801 penalty, while honest forecasters expressing 50/50 uncertainty on toss-up events
                   preserve superior average scores.
@@ -205,7 +206,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchWorkbench }) =
 
               <button
                 onClick={onLaunchWorkbench}
-                className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-stone-900 hover:text-black transition-colors cursor-pointer"
+                className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-stone-900 hover:text-black transition-colors cursor-pointer"
               >
                 <span>Explore On-Chain Records On Workbench</span>
                 <ArrowRight className="h-3.5 w-3.5" />

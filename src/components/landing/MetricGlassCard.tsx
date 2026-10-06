@@ -25,42 +25,21 @@ export const MetricGlassCard: React.FC<MetricGlassCardProps> = ({
   variant = 'rose',
   onLearnMore,
 }) => {
-  // Edge-to-edge vivid gradients and glass styling matching reference image
-  const variantConfig = {
-    rose: {
-      gradient: 'linear-gradient(145deg, #f43f5e 0%, #e11d48 45%, #9f1239 100%)',
-      borderColor: 'rgba(255, 255, 255, 0.28)',
-      shadow: '0 20px 45px -12px rgba(159, 18, 57, 0.45)',
-    },
-    purple: {
-      gradient: 'linear-gradient(145deg, #8b5cf6 0%, #7c3aed 45%, #4c1d95 100%)',
-      borderColor: 'rgba(255, 255, 255, 0.28)',
-      shadow: '0 20px 45px -12px rgba(76, 29, 149, 0.45)',
-    },
-    amber: {
-      gradient: 'linear-gradient(145deg, #f59e0b 0%, #ea580c 45%, #9a3412 100%)',
-      borderColor: 'rgba(255, 255, 255, 0.28)',
-      shadow: '0 20px 45px -12px rgba(154, 52, 18, 0.45)',
-    },
+  // Map our card variants to the reference design's layered gradient classes
+  const variantClass = {
+    rose: 'card--speed metric-card--speed',
+    purple: 'card--context metric-card--context',
+    amber: 'card--connections metric-card--connections',
   }[variant];
 
   return (
-    <div
-      className="glass-metric-card entrance-reveal group relative overflow-hidden rounded-[28px] border p-7 sm:p-8 backdrop-blur-2xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 hover:shadow-2xl flex flex-col justify-between"
-      style={
-        {
-          background: variantConfig.gradient,
-          borderColor: variantConfig.borderColor,
-          boxShadow: variantConfig.shadow,
-          '--card-delay': `${cardIndex * 150}ms`,
-        } as React.CSSProperties
-      }
+    <article
+      className={`metric-card ${variantClass} group p-7 sm:p-8 flex flex-col justify-between`}
     >
-      {/* SVG Turbulence Grain Overlay inside Card */}
-      <div className="card-grain-overlay pointer-events-none absolute inset-0 opacity-[0.06] mix-blend-overlay" />
-
-      {/* Diagonal Sheen (CSS ::before) */}
-      <div className="card-sheen-sweep pointer-events-none absolute inset-0 opacity-40 transition-opacity duration-500 group-hover:opacity-75" />
+      {/* Reference SVG Grain Overlay with feComponentTransfer */}
+      <svg className="card__grain" viewBox="0 0 429 554" aria-hidden="true">
+        <rect width="100%" height="100%" filter="url(#cardNoise)" />
+      </svg>
 
       {/* Internal Content Container */}
       <div className="relative z-10 flex h-full flex-col justify-between space-y-6">
@@ -76,13 +55,13 @@ export const MetricGlassCard: React.FC<MetricGlassCardProps> = ({
             </span>
           </div>
 
-          <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white/95 transition-all duration-300 group-hover:text-white group-hover:scale-[1.02] origin-left">
+          <h3 className="card-title text-2xl sm:text-3xl font-semibold tracking-tight text-white/95 transition-all duration-300 group-hover:text-white group-hover:scale-[1.02] origin-left">
             {title}
           </h3>
         </div>
 
-        {/* LED-Dot Matrix Metric Inset Panel */}
-        <div className="rounded-2xl border border-black/40 bg-black/55 p-5 shadow-2xl backdrop-blur-md transition-shadow duration-300 group-hover:shadow-inner">
+        {/* LED-Dot Matrix Metric Inset Window */}
+        <div className="card-metric rounded-2xl border border-black/35 bg-black/55 p-5 shadow-2xl backdrop-blur-md transition-shadow duration-300 group-hover:shadow-inner">
           <div className="mb-2 text-[10px] font-mono font-semibold tracking-widest text-white/70 uppercase">
             VERIFIED METRIC // ON-CHAIN
           </div>
@@ -102,7 +81,7 @@ export const MetricGlassCard: React.FC<MetricGlassCardProps> = ({
 
         {/* Caption & Explanatory Breakdown */}
         <div className="space-y-4">
-          <p className="text-base leading-relaxed font-normal text-white/90 transition-opacity duration-300 group-hover:text-white group-hover:opacity-100">
+          <p className="card-caption text-base leading-relaxed font-normal text-white/90 transition-opacity duration-300 group-hover:text-white group-hover:opacity-100">
             {caption}
           </p>
 
@@ -116,18 +95,18 @@ export const MetricGlassCard: React.FC<MetricGlassCardProps> = ({
           </div>
         </div>
 
-        {/* Rounded White Pill Learn More Button */}
+        {/* Reference Rounded White Pill Learn More Button */}
         <div className="pt-2">
           <button
             onClick={onLearnMore}
             type="button"
-            className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-xs font-bold uppercase tracking-wider text-stone-900 shadow-lg shadow-black/15 transition-all duration-200 hover:bg-stone-50 hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] cursor-pointer"
+            className="learn-more-btn w-full py-3 px-5 inline-flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-wider"
           >
             <span>Learn More</span>
             <ArrowUpRight className="h-4 w-4 text-stone-900" />
           </button>
         </div>
       </div>
-    </div>
+    </article>
   );
 };
