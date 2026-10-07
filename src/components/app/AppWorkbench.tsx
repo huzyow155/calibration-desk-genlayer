@@ -117,10 +117,10 @@ export const AppWorkbench: React.FC = () => {
         <section className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <span className="text-[11px] font-mono tracking-widest text-stone-400 uppercase">
+              <span className="text-xs font-mono tracking-widest text-stone-400 uppercase">
                 CALIBRATION WORKBENCH // GENLAYER STUDIONET
               </span>
-              <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+              <h1 className="text-4xl sm:text-5xl font-extrabold text-white tracking-tight">
                 Forecaster Evaluation Desk
               </h1>
             </div>
@@ -128,7 +128,7 @@ export const AppWorkbench: React.FC = () => {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setIsRegisterOpen(true)}
-                className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-xs font-semibold text-stone-950 hover:bg-stone-200 transition-colors shadow-lg cursor-pointer"
+                className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-stone-950 hover:bg-stone-200 transition-colors shadow-lg cursor-pointer"
               >
                 <PlusCircle className="h-4 w-4" />
                 <span>New Forecast</span>
@@ -136,14 +136,14 @@ export const AppWorkbench: React.FC = () => {
             </div>
           </div>
 
-          {/* Zero-GEN Guidance Notice Banner */}
-          <div className="rounded-2xl border border-sky-500/20 bg-sky-950/20 p-5 text-xs text-sky-200/90 leading-relaxed flex items-start gap-4 shadow-sm">
-            <Shield className="h-5 w-5 text-sky-400 shrink-0 mt-0.5" />
+          {/* Zero-GEN Guidance Notice Banner (Violet Accent - Informational/Neutral) */}
+          <div className="rounded-2xl border border-[#9d4f72]/30 bg-[#9d4f72]/15 p-5 text-stone-200 leading-relaxed flex items-start gap-4 shadow-sm">
+            <Shield className="h-5 w-5 text-[#9d4f72] shrink-0 mt-0.5" />
             <div className="space-y-1">
-              <span className="font-semibold text-sky-300 block text-sm">
+              <span className="font-semibold text-[#f5d0fe] block text-base">
                 Zero-GEN Forecasting Guarantee
               </span>
-              <p>
+              <p className="text-sm text-stone-300 leading-relaxed font-normal">
                 CalibrationLedger holds no funds and requires no financial stake. Forecasters register beliefs
                 in basis points (1 to 9999 bp) and resolutions are graded on real-world evidence.
                 Studionet validators subsidize gas, and all transactions carry zero token value.
@@ -156,8 +156,8 @@ export const AppWorkbench: React.FC = () => {
         <section className="rounded-2xl border border-white/10 bg-[#121418] p-6 sm:p-8 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/8 pb-4">
             <div>
-              <h2 className="text-lg font-bold text-white">Select Forecaster Profile</h2>
-              <p className="text-xs text-stone-400 font-light">
+              <h2 className="text-xl sm:text-2xl font-bold text-white">Select Forecaster Profile</h2>
+              <p className="text-sm text-stone-400 font-light mt-0.5">
                 Browse persistent on-chain predictions without connecting a wallet, or inspect your own address.
               </p>
             </div>
@@ -174,44 +174,47 @@ export const AppWorkbench: React.FC = () => {
 
           {/* Preset Buttons */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {/* Forecaster A - Rose Accent (The Trap Case) */}
             <button
               onClick={() => handleSelectProfile('A')}
               className={`rounded-xl border p-4 text-left transition-all cursor-pointer ${
                 selectedProfile === 'A'
-                  ? 'border-rose-500/50 bg-rose-950/20 shadow-md'
+                  ? 'border-[#ad355b]/70 bg-[#ad355b]/20 shadow-md'
                   : 'border-white/8 bg-black/30 hover:border-white/20'
               }`}
             >
               <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-white">Forecaster A</span>
-                <span className="rounded bg-rose-900/60 border border-rose-500/30 px-1.5 py-0.5 text-[10px] font-mono text-rose-300">
+                <span className="font-bold text-white text-sm">Forecaster A</span>
+                <span className="rounded bg-[#ad355b]/30 border border-[#ad355b]/50 px-2 py-0.5 text-[11px] font-mono text-[#ffb3c6]">
                   THE TRAP CASE
                 </span>
               </div>
-              <p className="mt-1.5 text-[11px] text-stone-400 font-light leading-snug">
+              <p className="mt-2 text-sm text-stone-400 font-light leading-snug">
                 Overconfident 9900 bp prediction that failed. Brier score severely penalized to 0.49505.
               </p>
             </button>
 
+            {/* Forecaster B - Amber Accent (Well-Calibrated) */}
             <button
               onClick={() => handleSelectProfile('B')}
               className={`rounded-xl border p-4 text-left transition-all cursor-pointer ${
                 selectedProfile === 'B'
-                  ? 'border-emerald-500/50 bg-emerald-950/20 shadow-md'
+                  ? 'border-[#d98c4f]/70 bg-[#d98c4f]/20 shadow-md'
                   : 'border-white/8 bg-black/30 hover:border-white/20'
               }`}
             >
               <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-white">Forecaster B</span>
-                <span className="rounded bg-emerald-900/60 border border-emerald-500/30 px-1.5 py-0.5 text-[10px] font-mono text-emerald-300">
+                <span className="font-bold text-white text-sm">Forecaster B</span>
+                <span className="rounded bg-[#d98c4f]/30 border border-[#d98c4f]/50 px-2 py-0.5 text-[11px] font-mono text-[#fed7aa]">
                   WELL-CALIBRATED
                 </span>
               </div>
-              <p className="mt-1.5 text-[11px] text-stone-400 font-light leading-snug">
+              <p className="mt-2 text-sm text-stone-400 font-light leading-snug">
                 Calibrated probabilities (1000 bp on NO, 8500 bp on YES). Pristine Brier score 0.01625.
               </p>
             </button>
 
+            {/* My Connected Wallet - Violet Accent */}
             <button
               onClick={() => handleSelectProfile('wallet')}
               disabled={!account}
@@ -219,15 +222,15 @@ export const AppWorkbench: React.FC = () => {
                 !account
                   ? 'opacity-50 cursor-not-allowed border-white/5 bg-black/20'
                   : selectedProfile === 'wallet'
-                  ? 'border-sky-500/50 bg-sky-950/20 shadow-md cursor-pointer'
+                  ? 'border-[#9d4f72]/70 bg-[#9d4f72]/20 shadow-md cursor-pointer'
                   : 'border-white/8 bg-black/30 hover:border-white/20 cursor-pointer'
               }`}
             >
               <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-white">My Connected Wallet</span>
-                <Wallet className="h-3.5 w-3.5 text-stone-400" />
+                <span className="font-bold text-white text-sm">My Connected Wallet</span>
+                <Wallet className={`h-4 w-4 ${selectedProfile === 'wallet' ? 'text-[#f5d0fe]' : 'text-stone-400'}`} />
               </div>
-              <p className="mt-1.5 text-[11px] text-stone-400 font-light leading-snug">
+              <p className="mt-2 text-sm text-stone-400 font-light leading-snug">
                 {account ? `${account.slice(0, 10)}...${account.slice(-4)}` : 'Connect wallet to view personal forecasts'}
               </p>
             </button>
@@ -236,18 +239,18 @@ export const AppWorkbench: React.FC = () => {
           {/* Search by custom address */}
           <form onSubmit={handleCustomSearch} className="flex gap-2 pt-2">
             <div className="relative flex-1">
-              <Search className="absolute left-3.5 top-3 h-4 w-4 text-stone-500" />
+              <Search className="absolute left-3.5 top-3.5 h-4 w-4 text-stone-500" />
               <input
                 type="text"
                 value={customInput}
                 onChange={(e) => setCustomInput(e.target.value)}
                 placeholder="Query any forecaster hex address: 0x..."
-                className="w-full rounded-xl border border-white/10 bg-black/40 pl-10 pr-4 py-2.5 text-xs text-white placeholder-stone-600 focus:border-white/30 focus:outline-none font-mono"
+                className="w-full rounded-xl border border-white/10 bg-black/40 pl-10 pr-4 py-2.5 text-sm text-white placeholder-stone-600 focus:border-[#9d4f72]/50 focus:outline-none font-mono"
               />
             </div>
             <button
               type="submit"
-              className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-semibold text-white hover:bg-white/10 transition-colors cursor-pointer"
+              className="rounded-xl border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10 transition-colors cursor-pointer"
             >
               Lookup
             </button>
@@ -269,15 +272,15 @@ export const AppWorkbench: React.FC = () => {
         <section className="rounded-2xl border border-white/10 bg-[#121418] p-6 sm:p-8 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/8 pb-4">
             <div>
-              <span className="text-[11px] font-mono tracking-widest text-stone-400 uppercase">
+              <span className="text-xs font-mono tracking-widest text-stone-400 uppercase">
                 ON-CHAIN FORECAST LEDGER
               </span>
-              <h3 className="text-xl font-bold text-white">
+              <h3 className="text-xl sm:text-2xl font-bold text-white">
                 Recorded Predictions ({predictions.length})
               </h3>
             </div>
 
-            <div className="text-xs font-mono text-stone-400">
+            <div className="text-[11px] font-mono text-stone-400">
               TARGET ADDRESS: {targetAddress.slice(0, 10)}...{targetAddress.slice(-4)}
             </div>
           </div>
@@ -287,7 +290,7 @@ export const AppWorkbench: React.FC = () => {
               Loading on-chain records from GenLayer Studionet...
             </div>
           ) : predictions.length === 0 ? (
-            <div className="py-12 text-center text-xs text-stone-500">
+            <div className="py-12 text-center text-sm text-stone-500">
               No registered predictions found for this address.
             </div>
           ) : (
@@ -304,19 +307,20 @@ export const AppWorkbench: React.FC = () => {
                     {/* Left: ID & Question */}
                     <div className="space-y-1.5 flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="font-mono text-xs font-bold text-sky-400">
+                        {/* Prediction ID with Violet Accent */}
+                        <span className="font-mono text-xs font-bold text-[#f5d0fe]">
                           #{p.prediction_id}
                         </span>
-                        <span className="text-[10px] font-mono text-stone-500">
+                        <span className="text-[11px] font-mono text-stone-400">
                           ROUND {p.created_at_round}
                         </span>
                         {isTrap && (
-                          <span className="rounded bg-rose-950/80 border border-rose-500/40 px-2 py-0.5 text-[9px] font-mono font-bold text-rose-300">
+                          <span className="rounded bg-[#8c1320]/40 border border-[#ad355b]/50 px-2 py-0.5 text-[10px] font-mono font-bold text-[#ffb3c6]">
                             TRAP PENALTY CASE
                           </span>
                         )}
                       </div>
-                      <p className="text-sm font-semibold text-white">
+                      <p className="text-base font-semibold text-white leading-snug">
                         {p.event_text}
                       </p>
                     </div>
@@ -324,27 +328,27 @@ export const AppWorkbench: React.FC = () => {
                     {/* Middle: Stated Probability & Status */}
                     <div className="flex items-center gap-6 text-xs font-mono">
                       <div>
-                        <span className="text-stone-500 block text-[10px]">PROBABILITY</span>
-                        <span className="font-bold text-white">{probPct}%</span>
-                        <span className="text-stone-500 text-[10px]"> ({p.prob_bp} bp)</span>
+                        <span className="text-stone-400 block text-[11px]">PROBABILITY</span>
+                        <span className="font-bold text-white text-sm">{probPct}%</span>
+                        <span className="text-stone-400 text-[11px]"> ({p.prob_bp} bp)</span>
                       </div>
 
                       <div>
-                        <span className="text-stone-500 block text-[10px]">OUTCOME</span>
+                        <span className="text-stone-400 block text-[11px]">OUTCOME</span>
                         {p.status === 'RESOLVED' ? (
                           <span
-                            className={`inline-flex items-center gap-1 font-bold ${
+                            className={`inline-flex items-center gap-1 font-bold text-sm ${
                               p.outcome === 'YES'
-                                ? 'text-emerald-400'
+                                ? 'text-[#d98c4f]'
                                 : p.outcome === 'NO'
-                                ? 'text-amber-400'
+                                ? 'text-[#ad355b]'
                                 : 'text-stone-400'
                             }`}
                           >
                             {p.outcome}
                           </span>
                         ) : (
-                          <span className="text-sky-400">OPEN</span>
+                          <span className="text-[#f5d0fe] font-semibold text-sm">OPEN</span>
                         )}
                       </div>
                     </div>
@@ -362,7 +366,7 @@ export const AppWorkbench: React.FC = () => {
                       {p.status === 'OPEN' && (
                         <button
                           onClick={() => setSelectedForResolve(p)}
-                          className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-500 transition-colors cursor-pointer"
+                          className="inline-flex items-center gap-1 rounded-lg bg-[#d98c4f] hover:bg-[#b8632e] px-3.5 py-1.5 text-xs font-semibold text-white transition-colors shadow-sm cursor-pointer"
                         >
                           <CheckCircle2 className="h-3.5 w-3.5" />
                           <span>Resolve</span>
@@ -462,10 +466,10 @@ export const AppWorkbench: React.FC = () => {
           <div className="relative w-full max-w-lg rounded-2xl border border-white/10 bg-[#121418] p-6 sm:p-8 shadow-2xl space-y-6">
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <div>
-                <span className="text-[10px] font-mono tracking-widest text-stone-400 uppercase">
+                <span className="text-xs font-mono tracking-widest text-stone-400 uppercase">
                   PREDICTION AUDIT DETAILS
                 </span>
-                <h3 className="text-xl font-bold text-white">
+                <h3 className="text-xl sm:text-2xl font-bold text-white">
                   Record #{inspectPrediction.prediction_id}
                 </h3>
               </div>
@@ -479,22 +483,28 @@ export const AppWorkbench: React.FC = () => {
 
             <div className="space-y-4 text-xs">
               <div className="rounded-xl border border-white/8 bg-black/40 p-3.5 space-y-1">
-                <span className="text-[10px] font-mono text-stone-500 uppercase">EVENT TEXT</span>
-                <p className="text-sm font-semibold text-white">{inspectPrediction.event_text}</p>
+                <span className="text-[11px] font-mono text-stone-400 uppercase">EVENT TEXT</span>
+                <p className="text-base font-semibold text-white leading-snug">{inspectPrediction.event_text}</p>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-xl border border-white/8 bg-black/40 p-3 font-mono">
-                  <span className="text-[10px] text-stone-500 uppercase block">STATED CONFIDENCE</span>
-                  <span className="text-sm font-bold text-emerald-400">
+                  <span className="text-[11px] text-stone-400 uppercase block">STATED CONFIDENCE</span>
+                  <span className="text-sm font-bold text-[#d98c4f]">
                     {(inspectPrediction.prob_bp / 100).toFixed(2)}%
                   </span>
-                  <span className="text-stone-500 text-[10px]"> ({inspectPrediction.prob_bp} bp)</span>
+                  <span className="text-stone-400 text-[11px]"> ({inspectPrediction.prob_bp} bp)</span>
                 </div>
 
                 <div className="rounded-xl border border-white/8 bg-black/40 p-3 font-mono">
-                  <span className="text-[10px] text-stone-500 uppercase block">OUTCOME</span>
-                  <span className="text-sm font-bold text-white">
+                  <span className="text-[11px] text-stone-400 uppercase block">OUTCOME</span>
+                  <span className={`text-sm font-bold ${
+                    inspectPrediction.outcome === 'YES'
+                      ? 'text-[#d98c4f]'
+                      : inspectPrediction.outcome === 'NO'
+                      ? 'text-[#ad355b]'
+                      : 'text-white'
+                  }`}>
                     {inspectPrediction.outcome || 'OPEN'}
                   </span>
                 </div>
@@ -502,11 +512,11 @@ export const AppWorkbench: React.FC = () => {
 
               {inspectPrediction.resolution_evidence && (
                 <div className="rounded-xl border border-white/8 bg-black/40 p-3.5 space-y-2">
-                  <div className="flex items-center justify-between text-[10px] font-mono text-stone-400">
+                  <div className="flex items-center justify-between text-[11px] font-mono text-stone-400">
                     <span>EVIDENCE TEXT</span>
-                    <span className="text-emerald-400">QUOTE: {inspectPrediction.resolution_quote}</span>
+                    <span className="text-[#d98c4f]">QUOTE: {inspectPrediction.resolution_quote}</span>
                   </div>
-                  <p className="text-stone-300 leading-relaxed font-light">
+                  <p className="text-stone-300 leading-relaxed font-light text-sm">
                     "{inspectPrediction.resolution_evidence}"
                   </p>
                 </div>

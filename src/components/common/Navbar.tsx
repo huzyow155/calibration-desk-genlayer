@@ -90,13 +90,13 @@ export const Navbar: React.FC<NavbarProps> = ({
             disabled={isConnecting}
             className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition-all cursor-pointer ${
               account
-                ? 'border border-emerald-500/30 bg-emerald-950/20 text-emerald-300 hover:bg-emerald-900/30'
+                ? 'border border-[#d98c4f]/40 bg-[#d98c4f]/20 text-[#fed7aa] hover:bg-[#d98c4f]/30'
                 : 'bg-white text-stone-950 hover:bg-stone-200'
             }`}
           >
             {account ? (
               <>
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+                <CheckCircle2 className="h-3.5 w-3.5 text-[#d98c4f]" />
                 <span className="font-mono">{shortAccount}</span>
               </>
             ) : (

@@ -106,10 +106,10 @@ export const RegisterPredictionModal: React.FC<RegisterPredictionModalProps> = (
         {/* Header */}
         <div className="flex items-center justify-between border-b border-white/10 pb-4">
           <div>
-            <span className="text-[10px] font-mono tracking-widest text-stone-400 uppercase">
+            <span className="text-xs font-mono tracking-widest text-stone-400 uppercase">
               REGISTER NEW FORECAST
             </span>
-            <h3 className="text-xl font-bold text-white">Record Probabilistic Belief</h3>
+            <h3 className="text-xl sm:text-2xl font-bold text-white">Record Probabilistic Belief</h3>
           </div>
           <button
             onClick={onClose}
@@ -123,10 +123,10 @@ export const RegisterPredictionModal: React.FC<RegisterPredictionModalProps> = (
           {/* Event description input */}
           <div className="space-y-2">
             <div className="flex justify-between text-xs">
-              <label className="font-semibold text-stone-300">
+              <label className="text-sm font-semibold text-stone-300">
                 Future Binary Event Question
               </label>
-              <span className={`font-mono ${eventText.length > 300 ? 'text-rose-400' : 'text-stone-500'}`}>
+              <span className={`font-mono text-xs ${eventText.length > 300 ? 'text-[#ad355b]' : 'text-stone-500'}`}>
                 {eventText.length} / 300
               </span>
             </div>
@@ -135,18 +135,18 @@ export const RegisterPredictionModal: React.FC<RegisterPredictionModalProps> = (
               value={eventText}
               onChange={(e) => setEventText(e.target.value)}
               placeholder="e.g. Will Artemis II launch astronauts into lunar flyby orbit before end of 2026?"
-              className="w-full rounded-xl border border-white/10 bg-black/40 p-3.5 text-sm text-white placeholder-stone-600 focus:border-white/30 focus:outline-none transition-colors"
+              className="w-full rounded-xl border border-white/10 bg-black/40 p-3.5 text-base text-white placeholder-stone-600 focus:border-[#9d4f72]/50 focus:outline-none transition-colors"
             />
           </div>
 
-          {/* Probability slider and number input */}
+          {/* Probability slider and number input (Warm Amber Accent) */}
           <div className="space-y-3 rounded-xl border border-white/8 bg-black/30 p-4">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-stone-300">
+              <label className="text-sm font-semibold text-stone-300">
                 Assigned Probability
               </label>
               <div className="flex items-baseline gap-2">
-                <span className="text-lg font-bold font-mono text-emerald-400">
+                <span className="text-xl font-bold font-mono text-[#d98c4f]">
                   {probPct}%
                 </span>
                 <span className="text-xs font-mono text-stone-400">
@@ -162,17 +162,17 @@ export const RegisterPredictionModal: React.FC<RegisterPredictionModalProps> = (
               step={25}
               value={probBp}
               onChange={(e) => setProbBp(Number(e.target.value))}
-              className="w-full h-1.5 bg-stone-700 rounded-lg appearance-none cursor-pointer accent-emerald-400"
+              className="w-full h-2 bg-stone-700 rounded-lg appearance-none cursor-pointer accent-[#d98c4f]"
             />
 
-            <div className="flex justify-between text-[10px] font-mono text-stone-500">
+            <div className="flex justify-between text-[11px] font-mono text-stone-500">
               <span>0.01% (1 bp)</span>
               <span>50.00% (5000 bp)</span>
               <span>99.99% (9999 bp)</span>
             </div>
 
-            <div className="flex items-start gap-2 pt-1 text-[11px] text-stone-400">
-              <Info className="h-3.5 w-3.5 text-stone-400 shrink-0 mt-0.5" />
+            <div className="flex items-start gap-2 pt-1 text-xs text-stone-400">
+              <Info className="h-4 w-4 text-stone-400 shrink-0 mt-0.5" />
               <span>
                 Literal 0% and 100% (0 and 10000 bp) are rejected by contract rules.
                 Well-calibrated forecasters account for residual uncertainty.
@@ -182,7 +182,7 @@ export const RegisterPredictionModal: React.FC<RegisterPredictionModalProps> = (
 
           {/* Deadline hint input */}
           <div className="space-y-2">
-            <label className="text-xs font-semibold text-stone-300">
+            <label className="text-sm font-semibold text-stone-300">
               Resolution Horizon / Deadline Hint
             </label>
             <input
@@ -190,13 +190,14 @@ export const RegisterPredictionModal: React.FC<RegisterPredictionModalProps> = (
               value={deadlineHint}
               onChange={(e) => setDeadlineHint(e.target.value)}
               placeholder="e.g. 2026-12-31 or Q4 2026"
-              className="w-full rounded-xl border border-white/10 bg-black/40 p-3 text-sm text-white placeholder-stone-600 focus:border-white/30 focus:outline-none transition-colors"
+              className="w-full rounded-xl border border-white/10 bg-black/40 p-3 text-base text-white placeholder-stone-600 focus:border-[#9d4f72]/50 focus:outline-none transition-colors"
             />
           </div>
 
+          {/* Error Notice (Rose Accent) */}
           {error && (
-            <div className="rounded-xl border border-rose-500/20 bg-rose-950/20 p-3 text-xs text-rose-300 flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 shrink-0" />
+            <div className="rounded-xl border border-[#ad355b]/40 bg-[#8c1320]/25 p-3.5 text-xs text-[#ffb3c6] flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 shrink-0 text-[#ad355b]" />
               <span>{error}</span>
             </div>
           )}
@@ -206,16 +207,16 @@ export const RegisterPredictionModal: React.FC<RegisterPredictionModalProps> = (
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 rounded-xl border border-white/10 bg-white/5 py-3 text-xs font-semibold text-stone-300 hover:bg-white/10 transition-colors cursor-pointer"
+              className="flex-1 rounded-xl border border-white/10 bg-white/5 py-3 text-sm font-semibold text-stone-300 hover:bg-white/10 transition-colors cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 rounded-xl bg-white py-3 text-xs font-semibold text-stone-950 hover:bg-stone-200 transition-colors cursor-pointer flex items-center justify-center gap-2"
+              className="flex-1 rounded-xl bg-[#d98c4f] hover:bg-[#b8632e] py-3 text-sm font-semibold text-white transition-colors shadow-md cursor-pointer flex items-center justify-center gap-2"
             >
-              <Send className="h-3.5 w-3.5" />
+              <Send className="h-4 w-4" />
               <span>Register Forecast</span>
             </button>
           </div>

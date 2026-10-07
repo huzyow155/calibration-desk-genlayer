@@ -30,22 +30,26 @@ export const DecileHistogram: React.FC<DecileHistogramProps> = ({
   buckets.forEach((b) => bucketMap.set(b.range, b));
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-[#121418] p-6 space-y-6">
+    <div className="rounded-2xl border border-white/10 bg-[#121418] p-6 sm:p-8 space-y-6">
       {/* Header with Brier Score & Forecaster Address */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/8 pb-4">
         <div>
-          <span className="text-[11px] font-mono tracking-widest text-stone-400 uppercase">
+          <span className="text-xs font-mono tracking-widest text-stone-400 uppercase">
             EMPIRICAL CALIBRATION CURVE
           </span>
-          <h4 className="text-lg font-bold text-white">
+          <h4 className="text-xl sm:text-2xl font-bold text-white">
             10-Decile Confidence Buckets
           </h4>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="rounded-xl border border-white/10 bg-black/40 px-3.5 py-1.5 text-right font-mono">
-            <span className="block text-[10px] text-stone-500 uppercase">BRIER SCORE</span>
-            <span className={`text-sm font-bold ${brierScore !== null && brierScore < 0.15 ? 'text-emerald-400' : 'text-amber-400'}`}>
+          <div className="rounded-xl border border-white/10 bg-black/40 px-4 py-2 text-right font-mono">
+            <span className="block text-[11px] text-stone-400 uppercase">BRIER SCORE</span>
+            <span
+              className={`text-base font-bold ${
+                brierScore !== null && brierScore < 0.15 ? 'text-[#d98c4f]' : 'text-[#ad355b]'
+              }`}
+            >
               {brierScore !== null ? brierScore.toFixed(5) : 'N/A'}
             </span>
           </div>
@@ -73,7 +77,7 @@ export const DecileHistogram: React.FC<DecileHistogramProps> = ({
                 {hasData && (
                   <div className="pointer-events-none absolute bottom-full mb-2 hidden group-hover:flex flex-col items-center z-20 w-28 rounded-lg border border-white/15 bg-black/90 p-2 text-center text-[10px] text-white shadow-xl">
                     <span className="font-bold text-stone-300">{d.label}</span>
-                    <span className="text-emerald-400 font-mono font-semibold">Hit Rate: {(hitRate * 100).toFixed(1)}%</span>
+                    <span className="text-[#d98c4f] font-mono font-semibold">Hit Rate: {(hitRate * 100).toFixed(1)}%</span>
                     <span className="text-stone-400 font-mono">Sample: {data!.hits}/{data!.n}</span>
                     <span className="text-stone-500 text-[9px] mt-0.5">Target: ~{(d.midpoint * 100).toFixed(0)}%</span>
                   </div>
@@ -90,8 +94,8 @@ export const DecileHistogram: React.FC<DecileHistogramProps> = ({
                   <div
                     className={`w-full rounded-t-md transition-all duration-300 relative z-10 ${
                       isMisaligned
-                        ? 'bg-gradient-to-t from-rose-600 to-amber-500 shadow-md shadow-rose-900/30'
-                        : 'bg-gradient-to-t from-emerald-600 to-teal-400 shadow-md shadow-emerald-900/30'
+                        ? 'bg-gradient-to-t from-[#8c1320] to-[#ad355b] shadow-md shadow-[#8c1320]/30'
+                        : 'bg-gradient-to-t from-[#b8632e] to-[#d98c4f] shadow-md shadow-[#b8632e]/30'
                     }`}
                     style={{ height: `${heightPct}%` }}
                   >
@@ -121,11 +125,11 @@ export const DecileHistogram: React.FC<DecileHistogramProps> = ({
       <div className="flex flex-wrap items-center justify-between gap-4 text-xs text-stone-400 pt-2 border-t border-white/8">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-sm bg-teal-400" />
+            <span className="h-2.5 w-2.5 rounded-sm bg-[#d98c4f]" />
             <span>Well-Calibrated Hit Rate</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-sm bg-rose-500" />
+            <span className="h-2.5 w-2.5 rounded-sm bg-[#ad355b]" />
             <span>Overconfidence Gap</span>
           </div>
           <div className="flex items-center gap-1.5">

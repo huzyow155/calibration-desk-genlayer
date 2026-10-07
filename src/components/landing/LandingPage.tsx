@@ -173,8 +173,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchWorkbench }) =
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-              <div className="rounded-2xl border border-rose-300/80 bg-rose-50/70 p-6 space-y-3 shadow-sm">
-                <div className="flex items-center gap-2 text-rose-800 font-semibold text-sm">
+              <div className="rounded-2xl border border-[#ad355b]/40 bg-[#ad355b]/10 p-6 space-y-3 shadow-sm">
+                <div className="flex items-center gap-2 text-[#8c1320] font-semibold text-sm">
                   <Scale className="h-4 w-4" />
                   <span>The Naive Accuracy Metric</span>
                 </div>
@@ -185,8 +185,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchWorkbench }) =
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-emerald-300/80 bg-emerald-50/70 p-6 space-y-3 shadow-sm">
-                <div className="flex items-center gap-2 text-emerald-800 font-semibold text-sm">
+              <div className="rounded-2xl border border-[#d98c4f]/40 bg-[#d98c4f]/10 p-6 space-y-3 shadow-sm">
+                <div className="flex items-center gap-2 text-[#b8632e] font-semibold text-sm">
                   <BarChart3 className="h-4 w-4" />
                   <span>Proper Brier Calibration</span>
                 </div>

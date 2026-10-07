@@ -1,8 +1,14 @@
 import React, { useState } from 'react';
-import { ShieldCheck, AlertTriangle, Send, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, AlertTriangle, Send, ExternalLink } from 'lucide-react';
 import { useWallet } from '../../context/WalletContext';
-import { executeCouncilEndorse, waitForReceiptWithProgress } from '../../services/contractService';
-import { CALIBRATED_COUNCIL_ADDRESS, STUDIONET_EXPLORER_URL } from '../../config/chain';
+import {
+  CALIBRATED_COUNCIL_ADDRESS,
+  STUDIONET_EXPLORER_URL,
+} from '../../config/chain';
+import {
+  executeCouncilEndorse,
+  waitForReceiptWithProgress,
+} from '../../services/contractService';
 import type { CalibrationReport } from '../../types/prediction';
 
 interface CouncilEndorsementSectionProps {
@@ -41,11 +47,12 @@ export const CouncilEndorsementSection: React.FC<CouncilEndorsementSectionProps>
 
     setError(null);
     setIsSubmitting(true);
-    onStartProgress('Endorsing Policy on Calibrated Council');
+    onStartProgress('Endorsing Policy via CalibratedCouncil');
 
     try {
       onUpdateProgress('submitting', 0);
       const txHash = await executeCouncilEndorse(writeClient, trimmed);
+
       onUpdateProgress('consensus', 0, txHash);
 
       const { receipt, success, durationSec } = await waitForReceiptWithProgress(
@@ -58,12 +65,14 @@ export const CouncilEndorsementSection: React.FC<CouncilEndorsementSectionProps>
         throw new Error(`Consensus failed: ${receipt?.status_name}`);
       }
 
+      onUpdateProgress('reading', durationSec, txHash);
       onUpdateProgress('success', durationSec, txHash);
       setStatement('');
       onSuccess();
     } catch (err: any) {
-      console.error('Council endorsement error:', err);
+      console.error('Policy endorsement error:', err);
       onUpdateProgress('error', 0, undefined, err.message || 'Transaction reverted');
+      setError(err.message || 'Endorsement call reverted.');
     } finally {
       setIsSubmitting(false);
     }
@@ -71,19 +80,13 @@ export const CouncilEndorsementSection: React.FC<CouncilEndorsementSectionProps>
 
   return (
     <div className="rounded-2xl border border-white/10 bg-[#121418] p-6 sm:p-8 space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/8 pb-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-mono tracking-widest text-stone-400 uppercase">
-              DOWNSTREAM CONSUMER INTEGRATION
-            </span>
-            <span className="rounded bg-sky-950/60 border border-sky-500/30 px-2 py-0.5 text-[10px] font-mono text-sky-300">
-              CONSUMER CONTRACT
-            </span>
-          </div>
-          <h3 className="text-xl font-bold text-white">
-            CalibratedCouncil Governance Gating
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/8 pb-4">
+        <div>
+          <span className="text-xs font-mono tracking-widest text-stone-400 uppercase">
+            DOWNSTREAM CONSUMER GOVERNANCE
+          </span>
+          <h3 className="text-xl sm:text-2xl font-bold text-white">
+            CalibratedCouncil Policy Endorsement
           </h3>
         </div>
 
@@ -91,24 +94,31 @@ export const CouncilEndorsementSection: React.FC<CouncilEndorsementSectionProps>
           href={`${STUDIONET_EXPLORER_URL}/address/${CALIBRATED_COUNCIL_ADDRESS}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-xs font-mono text-stone-400 hover:text-white transition-colors"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-mono text-stone-300 hover:bg-white/10 transition-colors"
         >
-          {CALIBRATED_COUNCIL_ADDRESS.slice(0, 10)}...{CALIBRATED_COUNCIL_ADDRESS.slice(-4)}
+          <span>Consumer Contract</span>
+          <ExternalLink className="h-3 w-3" />
         </a>
       </div>
 
-      <p className="text-xs sm:text-sm text-stone-300/85 leading-relaxed font-light">
+      <p className="text-sm text-stone-300 leading-relaxed font-normal">
         The CalibratedCouncil smart contract performs a direct cross-contract query to CalibrationLedger.
         Only forecasters with at least <strong>2 scored predictions</strong> and a verified <strong>Brier score &le; 0.1500</strong>{' '}
         can endorse high-stakes policy recommendations.
       </p>
 
       {/* Qualification Badge */}
-      <div className={`rounded-xl border p-4 flex items-start gap-3.5 ${isEligible ? 'border-emerald-500/30 bg-emerald-950/20 text-emerald-200' : 'border-amber-500/20 bg-amber-950/20 text-amber-200'}`}>
+      <div
+        className={`rounded-xl border p-4 flex items-start gap-3.5 ${
+          isEligible
+            ? 'border-[#d98c4f]/40 bg-[#d98c4f]/15 text-[#fed7aa]'
+            : 'border-[#ad355b]/40 bg-[#ad355b]/15 text-[#ffb3c6]'
+        }`}
+      >
         {isEligible ? (
-          <ShieldCheck className="h-5 w-5 text-emerald-400 shrink-0 mt-0.5" />
+          <ShieldCheck className="h-5 w-5 text-[#d98c4f] shrink-0 mt-0.5" />
         ) : (
-          <AlertTriangle className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
+          <AlertTriangle className="h-5 w-5 text-[#ad355b] shrink-0 mt-0.5" />
         )}
         <div className="space-y-1 text-xs">
           <div className="font-semibold text-sm">
@@ -116,7 +126,7 @@ export const CouncilEndorsementSection: React.FC<CouncilEndorsementSectionProps>
               ? 'Council Membership Eligible (Brier Score Qualified)'
               : 'Council Gating Requirement Not Met'}
           </div>
-          <div className="text-stone-300">
+          <div className="text-stone-300 text-xs">
             Current Profile: {nScored} scored events | Brier Score:{' '}
             <span className="font-mono font-bold">
               {brier !== null && brier !== undefined ? brier.toFixed(5) : 'Unscored'}
@@ -130,7 +140,7 @@ export const CouncilEndorsementSection: React.FC<CouncilEndorsementSectionProps>
       {isEligible && (
         <form onSubmit={handleSubmit} className="space-y-4 pt-2">
           <div className="space-y-2">
-            <label className="text-xs font-semibold text-stone-300">
+            <label className="text-sm font-semibold text-stone-300">
               Submit Endorsed Policy Recommendation
             </label>
             <input
@@ -138,12 +148,12 @@ export const CouncilEndorsementSection: React.FC<CouncilEndorsementSectionProps>
               value={statement}
               onChange={(e) => setStatement(e.target.value)}
               placeholder="e.g. Recommend maintaining 25% reserve liquidity buffer for upcoming quarter."
-              className="w-full rounded-xl border border-white/10 bg-black/40 p-3 text-sm text-white placeholder-stone-600 focus:border-white/30 focus:outline-none transition-colors"
+              className="w-full rounded-xl border border-white/10 bg-black/40 p-3.5 text-base text-white placeholder-stone-600 focus:border-[#9d4f72]/50 focus:outline-none transition-colors"
             />
           </div>
 
           {error && (
-            <div className="text-xs text-rose-400 font-mono">
+            <div className="text-xs text-[#ad355b] font-mono">
               Error: {error}
             </div>
           )}
@@ -151,9 +161,9 @@ export const CouncilEndorsementSection: React.FC<CouncilEndorsementSectionProps>
           <button
             type="submit"
             disabled={isSubmitting || !statement.trim()}
-            className="rounded-xl bg-white px-5 py-2.5 text-xs font-semibold text-stone-950 hover:bg-stone-200 transition-colors cursor-pointer flex items-center gap-2"
+            className="rounded-xl bg-[#d98c4f] hover:bg-[#b8632e] px-6 py-3 text-sm font-semibold text-white transition-colors cursor-pointer flex items-center gap-2 shadow-md"
           >
-            <Send className="h-3.5 w-3.5" />
+            <Send className="h-4 w-4" />
             <span>Endorse Policy via Consumer Contract</span>
           </button>
         </form>

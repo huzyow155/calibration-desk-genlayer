@@ -29,9 +29,9 @@ export const WaitingStateModal: React.FC<WaitingStateModalProps> = ({
         {/* Status Icon */}
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/5 shadow-inner">
           {stage === 'success' ? (
-            <CheckCircle2 className="h-8 w-8 text-emerald-400" />
+            <CheckCircle2 className="h-8 w-8 text-[#d98c4f]" />
           ) : stage === 'error' ? (
-            <AlertCircle className="h-8 w-8 text-rose-400" />
+            <AlertCircle className="h-8 w-8 text-[#ad355b]" />
           ) : (
             <Loader2 className="h-8 w-8 text-stone-200 animate-spin" />
           )}
@@ -57,13 +57,13 @@ export const WaitingStateModal: React.FC<WaitingStateModalProps> = ({
         {/* Progress Pipeline */}
         {stage !== 'error' && (
           <div className="grid grid-cols-3 gap-2 text-[10px] font-mono">
-            <div className={`p-2 rounded-lg border ${stage === 'submitting' ? 'border-sky-500 bg-sky-950/40 text-sky-300' : 'border-white/10 bg-black/40 text-stone-500'}`}>
+            <div className={`p-2 rounded-lg border ${stage === 'submitting' ? 'border-[#9d4f72] bg-[#9d4f72]/30 text-[#f5d0fe]' : 'border-white/10 bg-black/40 text-stone-500'}`}>
               1. BROADCAST
             </div>
-            <div className={`p-2 rounded-lg border ${stage === 'consensus' ? 'border-sky-500 bg-sky-950/40 text-sky-300' : stage === 'reading' || stage === 'success' ? 'border-emerald-500/30 text-emerald-400' : 'border-white/10 bg-black/40 text-stone-500'}`}>
+            <div className={`p-2 rounded-lg border ${stage === 'consensus' ? 'border-[#9d4f72] bg-[#9d4f72]/30 text-[#f5d0fe]' : stage === 'reading' || stage === 'success' ? 'border-[#d98c4f]/40 text-[#fed7aa]' : 'border-white/10 bg-black/40 text-stone-500'}`}>
               2. CONSENSUS
             </div>
-            <div className={`p-2 rounded-lg border ${stage === 'reading' || stage === 'success' ? 'border-emerald-500 bg-emerald-950/40 text-emerald-300' : 'border-white/10 bg-black/40 text-stone-500'}`}>
+            <div className={`p-2 rounded-lg border ${stage === 'reading' || stage === 'success' ? 'border-[#d98c4f] bg-[#d98c4f]/30 text-[#fed7aa]' : 'border-white/10 bg-black/40 text-stone-500'}`}>
               3. VERIFIED
             </div>
           </div>
@@ -77,7 +77,7 @@ export const WaitingStateModal: React.FC<WaitingStateModalProps> = ({
               href={`${STUDIONET_EXPLORER_URL}/tx/${txHash}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-sky-400 hover:text-sky-300 transition-colors"
+              className="inline-flex items-center gap-1 text-[#f5d0fe] hover:text-white transition-colors"
             >
               <span>Explorer</span>
               <ExternalLink className="h-3.5 w-3.5" />

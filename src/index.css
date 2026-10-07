@@ -10,6 +10,14 @@
     --ink: #202020;
     --copy: #4a4a4a;
     --glass-line: rgba(255, 255, 255, 0.36);
+
+    /* Shared 3-Accent Palette from Landing Page */
+    --accent-rose: #ad355b;        /* from card--speed gradient */
+    --accent-rose-deep: #8c1320;
+    --accent-violet: #9d4f72;      /* from card--context gradient */
+    --accent-violet-deep: #793246;
+    --accent-amber: #d98c4f;       /* from card--connections gradient, muted not neon */
+    --accent-amber-deep: #b8632e;
   }
 
   body {

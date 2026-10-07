@@ -96,10 +96,10 @@ export const ResolveEventModal: React.FC<ResolveEventModalProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between border-b border-white/10 pb-4">
           <div>
-            <span className="text-[10px] font-mono tracking-widest text-stone-400 uppercase">
+            <span className="text-xs font-mono tracking-widest text-stone-400 uppercase">
               CONSENSUS RESOLUTION
             </span>
-            <h3 className="text-xl font-bold text-white">Submit Real-World Evidence</h3>
+            <h3 className="text-xl sm:text-2xl font-bold text-white">Submit Real-World Evidence</h3>
           </div>
           <button
             onClick={onClose}
@@ -112,10 +112,10 @@ export const ResolveEventModal: React.FC<ResolveEventModalProps> = ({
         {/* Prediction Target Details */}
         <div className="rounded-xl border border-white/10 bg-black/40 p-4 space-y-2 text-xs">
           <div className="flex items-center justify-between text-stone-400 font-mono text-[11px]">
-            <span>ID: {prediction.prediction_id}</span>
+            <span className="text-[#f5d0fe]">ID: #{prediction.prediction_id}</span>
             <span>PROBABILITY: {(prediction.prob_bp / 100).toFixed(2)}% ({prediction.prob_bp} bp)</span>
           </div>
-          <p className="text-sm font-semibold text-white">
+          <p className="text-base font-semibold text-white leading-snug">
             "{prediction.event_text}"
           </p>
         </div>
@@ -123,7 +123,7 @@ export const ResolveEventModal: React.FC<ResolveEventModalProps> = ({
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Evidence Text Input */}
           <div className="space-y-2">
-            <label className="text-xs font-semibold text-stone-300">
+            <label className="text-sm font-semibold text-stone-300">
               Reporting or Press Release Evidence
             </label>
             <textarea
@@ -131,16 +131,16 @@ export const ResolveEventModal: React.FC<ResolveEventModalProps> = ({
               value={evidenceText}
               onChange={(e) => setEvidenceText(e.target.value)}
               placeholder="Paste factual reporting text documenting whether the event occurred or failed..."
-              className="w-full rounded-xl border border-white/10 bg-black/40 p-3.5 text-sm text-white placeholder-stone-600 focus:border-white/30 focus:outline-none transition-colors"
+              className="w-full rounded-xl border border-white/10 bg-black/40 p-3.5 text-base text-white placeholder-stone-600 focus:border-[#9d4f72]/50 focus:outline-none transition-colors"
             />
           </div>
 
-          {/* Verbatim Grounding Notice */}
-          <div className="rounded-xl border border-amber-500/20 bg-amber-950/20 p-4 text-xs text-amber-200/90 leading-relaxed flex items-start gap-3">
-            <ShieldAlert className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+          {/* Verbatim Grounding Notice (Warm Amber Accent) */}
+          <div className="rounded-xl border border-[#d98c4f]/30 bg-[#d98c4f]/15 p-4 text-xs text-[#fed7aa] leading-relaxed flex items-start gap-3">
+            <ShieldAlert className="h-4 w-4 text-[#d98c4f] shrink-0 mt-0.5" />
             <div className="space-y-1">
-              <span className="font-semibold text-amber-300 block">Verbatim Grounding Rule</span>
-              <p>
+              <span className="font-semibold text-[#fed7aa] block text-sm">Verbatim Grounding Rule</span>
+              <p className="text-stone-300 text-xs leading-relaxed font-normal">
                 Validators extract an outcome and a verbatim quote. If the quote is shorter than 12 characters
                 or does not exist verbatim inside your submitted text, the resolution automatically becomes
                 AMBIGUOUS (wash event, excluded from Brier average).
@@ -148,9 +148,10 @@ export const ResolveEventModal: React.FC<ResolveEventModalProps> = ({
             </div>
           </div>
 
+          {/* Error Notice (Rose Accent) */}
           {error && (
-            <div className="rounded-xl border border-rose-500/20 bg-rose-950/20 p-3 text-xs text-rose-300 flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 shrink-0" />
+            <div className="rounded-xl border border-[#ad355b]/40 bg-[#8c1320]/25 p-3.5 text-xs text-[#ffb3c6] flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 shrink-0 text-[#ad355b]" />
               <span>{error}</span>
             </div>
           )}
@@ -160,16 +161,16 @@ export const ResolveEventModal: React.FC<ResolveEventModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 rounded-xl border border-white/10 bg-white/5 py-3 text-xs font-semibold text-stone-300 hover:bg-white/10 transition-colors cursor-pointer"
+              className="flex-1 rounded-xl border border-white/10 bg-white/5 py-3 text-sm font-semibold text-stone-300 hover:bg-white/10 transition-colors cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 rounded-xl bg-white py-3 text-xs font-semibold text-stone-950 hover:bg-stone-200 transition-colors cursor-pointer flex items-center justify-center gap-2"
+              className="flex-1 rounded-xl bg-[#d98c4f] hover:bg-[#b8632e] py-3 text-sm font-semibold text-white transition-colors shadow-md cursor-pointer flex items-center justify-center gap-2"
             >
-              <CheckCircle className="h-3.5 w-3.5" />
+              <CheckCircle className="h-4 w-4" />
               <span>Trigger Consensus</span>
             </button>
           </div>

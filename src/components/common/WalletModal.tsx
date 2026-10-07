@@ -40,9 +40,9 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => 
           </button>
         </div>
 
-        {/* Zero-GEN Notice */}
-        <div className="rounded-xl border border-sky-500/20 bg-sky-950/20 p-4 text-xs text-sky-200/90 leading-relaxed space-y-1">
-          <div className="font-semibold text-sky-300 flex items-center gap-1.5">
+        {/* Zero-GEN Notice (Violet Accent - Neutral/Info) */}
+        <div className="rounded-xl border border-[#9d4f72]/30 bg-[#9d4f72]/15 p-4 text-xs text-stone-200 leading-relaxed space-y-1">
+          <div className="font-semibold text-[#f5d0fe] flex items-center gap-1.5">
             <span>Zero-GEN Required</span>
           </div>
           <p>
@@ -58,21 +58,21 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => 
               <div className="text-[11px] font-mono text-stone-400 uppercase">
                 Active Address
               </div>
-              <div className="font-mono text-sm text-emerald-400 break-all select-all">
+              <div className="font-mono text-sm text-[#d98c4f] break-all select-all font-semibold">
                 {account}
               </div>
             </div>
 
             {!isCorrectNetwork && (
-              <div className="rounded-xl border border-amber-500/20 bg-amber-950/20 p-4 space-y-2 text-xs text-amber-200">
-                <div className="flex items-center gap-1.5 font-semibold text-amber-300">
-                  <AlertCircle className="h-4 w-4" />
+              <div className="rounded-xl border border-[#d98c4f]/30 bg-[#d98c4f]/15 p-4 space-y-2 text-xs text-[#fed7aa]">
+                <div className="flex items-center gap-1.5 font-semibold text-[#fed7aa]">
+                  <AlertCircle className="h-4 w-4 text-[#d98c4f]" />
                   <span>Network Mismatch</span>
                 </div>
                 <p>Please switch your connected wallet network to {STUDIONET_NAME}.</p>
                 <button
                   onClick={switchNetwork}
-                  className="w-full mt-2 rounded-lg bg-amber-500 py-2 text-xs font-semibold text-black hover:bg-amber-400 transition-colors cursor-pointer"
+                  className="w-full mt-2 rounded-lg bg-[#d98c4f] py-2 text-xs font-semibold text-white hover:bg-[#b8632e] transition-colors cursor-pointer"
                 >
                   Switch to Studionet
                 </button>
@@ -85,7 +85,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => 
                   disconnectWallet();
                   onClose();
                 }}
-                className="flex-1 rounded-xl border border-rose-500/20 bg-rose-950/20 py-2.5 text-xs font-semibold text-rose-300 hover:bg-rose-900/40 transition-colors cursor-pointer"
+                className="flex-1 rounded-xl border border-[#ad355b]/40 bg-[#8c1320]/25 py-2.5 text-xs font-semibold text-[#ffb3c6] hover:bg-[#8c1320]/40 transition-colors cursor-pointer"
               >
                 Disconnect
               </button>
