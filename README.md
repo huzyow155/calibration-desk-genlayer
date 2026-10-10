@@ -10,11 +10,12 @@ Accuracy alone rewards the wrong behavior: a forecaster who predicts "whatever i
 
 `CalibrationLedger` scores forecasters on calibration rather than raw hit-rate using the strictly proper Brier scoring rule and an empirical decile histogram. All evaluation happens on-chain on GenLayer Studionet without capital collateral.
 
-- **Deployed CalibrationLedger Contract**: `0xAaD7A38119EeE71CAC50ddf112d4E12fBB00026a`
-- **Deployed CalibratedCouncil Consumer**: `0xbaB6Ac817D544A65e72dB933897031059c8601EF`
+- **Deployed CalibrationLedger Contract**: `0x7D98a9272f23cDeD5E54A62fbC0d3A535ac7B7da`
+- **Deployed CalibratedCouncil Consumer**: `0x7B567289162C9D87a02B160B5494fb2Dfa3277ca`
 - **Network**: GenLayer Studionet (Chain ID `61999`, RPC `https://studio.genlayer.com/api`)
 - **Canonical Contract Repository**: [huzyow155/calibration-ledger-genlayer](https://github.com/huzyow155/calibration-ledger-genlayer)
-- **Contract Code SHA-256**: `53805eef041b364b16f302c4c46209e5e4467788ed6cb3fcd2d19c2718274e91`
+- **CalibrationLedger SHA-256**: `60335bb7fff387711341dc65b3a226127851a350f415ee7f8c105d33762b279b`
+- **CalibratedCouncil SHA-256**: `fadd11f11430e82d2c1c8e641bbaff2770f05b8faa5d798f651246ddc8a9ccfa`
 
 ---
 
@@ -30,13 +31,14 @@ Accuracy alone rewards the wrong behavior: a forecaster who predicts "whatever i
 
 2. **Calibration Desk Workbench (`/app`)**:
    - **Persistent On-Chain Showcase**: Immediate no-wallet access to existing on-chain forecaster records:
-     - **Forecaster A (Trap Case Demo)**: `0xc65E820fb874748Bf169739844f545a3543D0c50` (9900 bp overconfident miss on ID `40b6e6aa4f33`, Brier `0.49505`).
-     - **Forecaster B (Well-Calibrated Demo)**: `0x5365D235deed7c291Bb21aA36938F783EFFB2D29` (Brier `0.01625`).
+     - **Forecaster A (Trap Case Demo)**: `0xDE0fbC71F750b591C8703A9C0080EA79a533ff41` (FOMC rate cut & Starship Flight 6 trap case, Brier `0.4913`).
+     - **Forecaster B (Well-Calibrated Demo)**: `0x13981fbbd3E42bf2D6170121ab9E0038CD4fEc46` (Project Meridian & ECB rate decision, Brier `0.0100`).
+      - **Forecaster C (Contested Demo)**: `0xb487065c4D3c3FB2d5065662fC5f90590917a041` (Candidate Davis election forecast, contested in 300s window).
    - **Interactive Decile Histogram**: Visual calibration curve showing actual hit rate vs expected probability line across 10 confidence deciles.
    - **Wallet Connection**: EIP-6963 multi-wallet discovery and standard injected wallet support.
-   - **Register Prediction**: Submit future event statements, probability in basis points (1..9999 bp), and optional deadline hint.
-   - **Resolve Event**: Submit verified real-world evidence URLs and text for deterministic LLM quote extraction and outcome classification (`YES` / `NO` / `AMBIGUOUS`).
-   - **Consumer Integration (`CalibratedCouncil`)**: Cross-contract gate enforcing maximum Brier score &le; 0.1500 and &ge; 2 scored events before allowing policy endorsement.
+   - **Register Prediction**: Submit future event statements, probability in basis points (1..9999 bp), ISO-8601 UTC resolve deadline (resolve_after), and allowlisted source URL.
+   - **Resolve Event**: Contract fetches authoritative text directly from fixed allowlisted domains with 300s provisional contest window before final settlement.
+   - **Consumer Integration (`CalibratedCouncil`)**: Cross-contract gate enforcing maximum Brier score &le; 0.1500 and &ge; 2 settled events before allowing policy endorsement.
 
 ---
 

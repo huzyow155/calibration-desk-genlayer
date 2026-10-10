@@ -1,14 +1,20 @@
 import React, { useState } from 'react';
-import { X, Send, AlertCircle, Info } from 'lucide-react';
+import { X, Send, AlertCircle, Info, Globe, Clock } from 'lucide-react';
 import { useWallet } from '../../context/WalletContext';
 import { executeRegisterPrediction, waitForReceiptWithProgress } from '../../services/contractService';
+import { ALLOWED_DOMAINS, MIN_LEAD_SECONDS } from '../../config/chain';
 
 interface RegisterPredictionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: (predictionId: string) => void;
   onStartProgress: (title: string) => void;
-  onUpdateProgress: (stage: 'submitting' | 'consensus' | 'reading' | 'success' | 'error', elapsed: number, txHash?: string, error?: string) => void;
+  onUpdateProgress: (
+    stage: 'submitting' | 'consensus' | 'reading' | 'success' | 'error',
+    elapsed: number,
+    txHash?: string,
+    error?: string
+  ) => void;
 }
 
 export const RegisterPredictionModal: React.FC<RegisterPredictionModalProps> = ({
@@ -20,13 +26,55 @@ export const RegisterPredictionModal: React.FC<RegisterPredictionModalProps> = (
 }) => {
   const { account, writeClient } = useWallet();
 
+  const minDate = new Date(Date.now() + (MIN_LEAD_SECONDS + 60) * 1000);
+  const minDateStr = minDate.toISOString().slice(0, 16);
+
   const [eventText, setEventText] = useState('');
   const [probBp, setProbBp] = useState<number>(7500);
-  const [deadlineHint, setDeadlineHint] = useState('2026-12-31');
+  const [resolveAfterLocal, setResolveAfterLocal] = useState(minDateStr);
+  const [sourceUrl, setSourceUrl] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   if (!isOpen) return null;
+
+  const validateUrlClient = (rawUrl: string): string => {
+    const clean = rawUrl.trim();
+    if (!clean) throw new Error('Source URL cannot be empty.');
+    if (clean.length > 300) throw new Error('Source URL exceeds 300 characters.');
+    if (/\s/.test(clean)) throw new Error('Source URL cannot contain whitespace.');
+
+    let parsed: URL;
+    try {
+      parsed = new URL(clean);
+    } catch {
+      throw new Error('Invalid URL format.');
+    }
+
+    if (parsed.protocol !== 'https:') throw new Error('Source URL scheme must be https://');
+    if (!parsed.hostname) throw new Error('Source URL missing hostname.');
+    if (parsed.username || parsed.password) throw new Error('Source URL cannot contain userinfo credentials.');
+    if (parsed.port && parsed.port !== '443') throw new Error('Source URL port must be 443 or omitted.');
+    if (parsed.hash) throw new Error('Source URL cannot contain fragments (#).');
+
+    const host = parsed.hostname.toLowerCase().replace(/\.$/, '');
+    if (!/^[\x00-\x7F]+$/.test(host)) throw new Error('Hostname must be pure ASCII.');
+    if (host.includes('xn--')) throw new Error('Hostname cannot use punycode.');
+    if (/^(\d{1,3}\.){3}\d{1,3}$/.test(host) || host.includes(':')) {
+      throw new Error('Hostname cannot be an IP address literal.');
+    }
+
+    const matched = ALLOWED_DOMAINS.some(
+      (dom) => host === dom || host.endsWith('.' + dom)
+    );
+    if (!matched) {
+      throw new Error(
+        `Domain "${host}" is not on the authorized allowlist. Allowed: ${ALLOWED_DOMAINS.join(', ')}`
+      );
+    }
+
+    return clean;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,12 +83,12 @@ export const RegisterPredictionModal: React.FC<RegisterPredictionModalProps> = (
       return;
     }
 
-    const trimmed = eventText.trim();
-    if (!trimmed) {
+    const trimmedEvent = eventText.trim();
+    if (!trimmedEvent) {
       setError('Event text cannot be empty.');
       return;
     }
-    if (trimmed.length > 300) {
+    if (trimmedEvent.length > 300) {
       setError('Event text exceeds 300 characters limit.');
       return;
     }
@@ -48,6 +96,23 @@ export const RegisterPredictionModal: React.FC<RegisterPredictionModalProps> = (
       setError('Probability must be between 1 and 9999 basis points.');
       return;
     }
+
+    let validatedUrl = '';
+    try {
+      validatedUrl = validateUrlClient(sourceUrl);
+    } catch (urlErr: any) {
+      setError(urlErr.message);
+      return;
+    }
+
+    const selectedDate = new Date(resolveAfterLocal);
+    const nowMs = Date.now();
+    if (selectedDate.getTime() < nowMs + MIN_LEAD_SECONDS * 1000) {
+      setError(`Resolve deadline must be at least ${MIN_LEAD_SECONDS} seconds in the future.`);
+      return;
+    }
+
+    const resolveAfterUtc = selectedDate.toISOString().replace(/\.\d{3}Z$/, 'Z');
 
     setError(null);
     setIsSubmitting(true);
@@ -58,9 +123,10 @@ export const RegisterPredictionModal: React.FC<RegisterPredictionModalProps> = (
       onUpdateProgress('submitting', 0);
       const txHash = await executeRegisterPrediction(
         writeClient,
-        trimmed,
+        trimmedEvent,
         probBp,
-        deadlineHint.trim() || '2026-12-31'
+        resolveAfterUtc,
+        validatedUrl
       );
 
       onUpdateProgress('consensus', 0, txHash);
@@ -77,7 +143,6 @@ export const RegisterPredictionModal: React.FC<RegisterPredictionModalProps> = (
 
       onUpdateProgress('reading', durationSec, txHash);
 
-      // Extract prediction ID
       const payload = receipt?.consensus_data?.leader_receipt?.[0]?.result?.payload?.readable;
       let pid = '';
       if (payload) {
@@ -98,126 +163,146 @@ export const RegisterPredictionModal: React.FC<RegisterPredictionModalProps> = (
     }
   };
 
-  const probPct = (probBp / 100).toFixed(2);
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-      <div className="relative w-full max-w-lg rounded-2xl border border-white/10 bg-[#121418] p-6 sm:p-8 shadow-2xl space-y-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+      <div className="relative w-full max-w-xl bg-[#14151a] border border-[#2b2d35] rounded-xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-white/10 pb-4">
-          <div>
-            <span className="text-xs font-mono tracking-widest text-stone-400 uppercase">
-              REGISTER NEW FORECAST
-            </span>
-            <h3 className="text-xl sm:text-2xl font-bold text-white">Record Probabilistic Belief</h3>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#2b2d35] bg-[#1a1b22]">
+          <div className="flex items-center gap-2">
+            <div className="w-2.5 h-2.5 rounded-full bg-[#d98c4f] animate-pulse" />
+            <h3 className="text-base sm:text-lg font-semibold text-white tracking-wide">
+              REGISTER NEW PREDICTION
+            </h3>
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1 text-stone-400 hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
+            className="p-1 text-slate-400 hover:text-white rounded-lg transition-colors"
           >
-            <X className="h-5 w-5" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Event description input */}
-          <div className="space-y-2">
-            <div className="flex justify-between text-xs">
-              <label className="text-sm font-semibold text-stone-300">
-                Future Binary Event Question
-              </label>
-              <span className={`font-mono text-xs ${eventText.length > 300 ? 'text-[#ad355b]' : 'text-stone-500'}`}>
-                {eventText.length} / 300
-              </span>
-            </div>
-            <textarea
-              rows={3}
-              value={eventText}
-              onChange={(e) => setEventText(e.target.value)}
-              placeholder="e.g. Will Artemis II launch astronauts into lunar flyby orbit before end of 2026?"
-              className="w-full rounded-xl border border-white/10 bg-black/40 p-3.5 text-base text-white placeholder-stone-600 focus:border-[#9d4f72]/50 focus:outline-none transition-colors"
-            />
-          </div>
-
-          {/* Probability slider and number input (Warm Amber Accent) */}
-          <div className="space-y-3 rounded-xl border border-white/8 bg-black/30 p-4">
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-semibold text-stone-300">
-                Assigned Probability
-              </label>
-              <div className="flex items-baseline gap-2">
-                <span className="text-xl font-bold font-mono text-[#d98c4f]">
-                  {probPct}%
-                </span>
-                <span className="text-xs font-mono text-stone-400">
-                  ({probBp} bp)
-                </span>
-              </div>
-            </div>
-
-            <input
-              type="range"
-              min={1}
-              max={9999}
-              step={25}
-              value={probBp}
-              onChange={(e) => setProbBp(Number(e.target.value))}
-              className="w-full h-2 bg-stone-700 rounded-lg appearance-none cursor-pointer accent-[#d98c4f]"
-            />
-
-            <div className="flex justify-between text-[11px] font-mono text-stone-500">
-              <span>0.01% (1 bp)</span>
-              <span>50.00% (5000 bp)</span>
-              <span>99.99% (9999 bp)</span>
-            </div>
-
-            <div className="flex items-start gap-2 pt-1 text-xs text-stone-400">
-              <Info className="h-4 w-4 text-stone-400 shrink-0 mt-0.5" />
-              <span>
-                Literal 0% and 100% (0 and 10000 bp) are rejected by contract rules.
-                Well-calibrated forecasters account for residual uncertainty.
-              </span>
-            </div>
-          </div>
-
-          {/* Deadline hint input */}
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-stone-300">
-              Resolution Horizon / Deadline Hint
-            </label>
-            <input
-              type="text"
-              value={deadlineHint}
-              onChange={(e) => setDeadlineHint(e.target.value)}
-              placeholder="e.g. 2026-12-31 or Q4 2026"
-              className="w-full rounded-xl border border-white/10 bg-black/40 p-3 text-base text-white placeholder-stone-600 focus:border-[#9d4f72]/50 focus:outline-none transition-colors"
-            />
-          </div>
-
-          {/* Error Notice (Rose Accent) */}
+        {/* Content */}
+        <form onSubmit={handleSubmit} className="p-6 space-y-5 overflow-y-auto flex-1">
           {error && (
-            <div className="rounded-xl border border-[#ad355b]/40 bg-[#8c1320]/25 p-3.5 text-xs text-[#ffb3c6] flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 shrink-0 text-[#ad355b]" />
+            <div className="flex items-start gap-3 p-3.5 bg-[#ad355b]/10 border border-[#ad355b]/40 rounded-lg text-rose-200 text-sm">
+              <AlertCircle className="w-5 h-5 text-[#ad355b] shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
 
-          {/* Actions */}
-          <div className="flex items-center gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 rounded-xl border border-white/10 bg-white/5 py-3 text-sm font-semibold text-stone-300 hover:bg-white/10 transition-colors cursor-pointer"
-            >
-              Cancel
-            </button>
+          {/* Event Text */}
+          <div className="space-y-1.5">
+            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
+              Event Description (Max 300 chars)
+            </label>
+            <textarea
+              value={eventText}
+              onChange={(e) => setEventText(e.target.value)}
+              placeholder="e.g. Did the Federal Open Market Committee lower the target range for federal funds rate by 25 basis points?"
+              maxLength={300}
+              rows={3}
+              className="w-full px-3.5 py-2.5 bg-[#0b0c0e] border border-[#2b2d35] rounded-lg text-white placeholder-slate-500 text-base focus:outline-none focus:border-[#9d4f72] transition-colors resize-none"
+              required
+            />
+            <div className="flex justify-between text-xs text-slate-400">
+              <span>Be specific and binary (settles YES or NO)</span>
+              <span>{eventText.length}/300</span>
+            </div>
+          </div>
+
+          {/* Probability Slider */}
+          <div className="space-y-2 p-4 bg-[#1a1b22] border border-[#2b2d35] rounded-lg">
+            <div className="flex justify-between items-center">
+              <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                Assessed Probability
+              </label>
+              <div className="flex items-center gap-2">
+                <span className="text-2xl font-bold font-mono text-[#d98c4f]">
+                  {(probBp / 100).toFixed(2)}%
+                </span>
+                <span className="text-xs text-slate-400 font-mono">({probBp} bp)</span>
+              </div>
+            </div>
+            <input
+              type="range"
+              min="1"
+              max="9999"
+              step="50"
+              value={probBp}
+              onChange={(e) => setProbBp(Number(e.target.value))}
+              className="w-full h-2 bg-[#0b0c0e] rounded-lg appearance-none cursor-pointer accent-[#d98c4f]"
+            />
+            <div className="flex justify-between text-[11px] text-slate-400 font-mono pt-1">
+              <span>0.01% (Unlikely)</span>
+              <span>50.00% (Neutral)</span>
+              <span>99.99% (Certain)</span>
+            </div>
+          </div>
+
+          {/* Resolution Timing & Source URL */}
+          <div className="grid grid-cols-1 gap-4">
+            {/* Resolve After */}
+            <div className="space-y-1.5">
+              <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                <Clock className="w-3.5 h-3.5 text-[#d98c4f]" />
+                Resolve Deadline (ISO-8601 UTC)
+              </label>
+              <input
+                type="datetime-local"
+                min={minDateStr}
+                value={resolveAfterLocal}
+                onChange={(e) => setResolveAfterLocal(e.target.value)}
+                className="w-full px-3.5 py-2.5 bg-[#0b0c0e] border border-[#2b2d35] rounded-lg text-white text-base focus:outline-none focus:border-[#9d4f72] transition-colors"
+                required
+              />
+              <p className="text-[11px] text-slate-400">
+                Enforced by contract: must be at least {MIN_LEAD_SECONDS}s in the future.
+              </p>
+            </div>
+
+            {/* Committed Source URL */}
+            <div className="space-y-1.5">
+              <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                <Globe className="w-3.5 h-3.5 text-[#9d4f72]" />
+                Committed Resolution Source URL
+              </label>
+              <input
+                type="url"
+                value={sourceUrl}
+                onChange={(e) => setSourceUrl(e.target.value)}
+                placeholder="https://raw.githubusercontent.com/... or https://reuters.com/..."
+                className="w-full px-3.5 py-2.5 bg-[#0b0c0e] border border-[#2b2d35] rounded-lg text-white text-base focus:outline-none focus:border-[#9d4f72] transition-colors"
+                required
+              />
+              <div className="p-2.5 bg-[#0b0c0e] border border-[#2b2d35] rounded-md text-[11px] text-slate-400 space-y-1">
+                <span className="font-semibold text-slate-300 uppercase tracking-wider block">
+                  Authorized Domain Allowlist:
+                </span>
+                <p className="font-mono text-slate-400 leading-relaxed">
+                  {ALLOWED_DOMAINS.join(', ')}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Zero Capital Info Banner */}
+          <div className="flex items-start gap-3 p-3.5 bg-[#9d4f72]/10 border border-[#9d4f72]/30 rounded-lg text-slate-300 text-xs">
+            <Info className="w-4 h-4 text-[#9d4f72] shrink-0 mt-0.5" />
+            <span>
+              <strong>Zero Capital At Risk:</strong> Predictions require no token stake. Only calibration reputation is evaluated on-chain via quadratic Brier score.
+            </span>
+          </div>
+
+          {/* Submit */}
+          <div className="pt-2">
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="flex-1 rounded-xl bg-[#d98c4f] hover:bg-[#b8632e] py-3 text-sm font-semibold text-white transition-colors shadow-md cursor-pointer flex items-center justify-center gap-2"
+              disabled={isSubmitting || !account}
+              className="w-full flex items-center justify-center gap-2 px-5 py-3 bg-[#d98c4f] hover:bg-[#b8632e] disabled:opacity-50 text-white text-base font-semibold rounded-lg shadow-lg shadow-[#d98c4f]/20 transition-all"
             >
-              <Send className="h-4 w-4" />
-              <span>Register Forecast</span>
+              <Send className="w-4 h-4" />
+              <span>{isSubmitting ? 'Registering...' : 'Register Prediction on Studionet'}</span>
             </button>
           </div>
         </form>

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { ArrowRight, Sparkles, Scale, Shield, BarChart3, Binary } from 'lucide-react';
 import { MetricGlassCard } from './MetricGlassCard';
+import { CALIBRATION_LEDGER_ADDRESS } from '../../config/chain';
 
 interface LandingPageProps {
   onLaunchWorkbench: () => void;
@@ -201,7 +202,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchWorkbench }) =
             <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-stone-200">
               <div className="flex items-center gap-3 text-xs text-stone-600 font-mono font-medium">
                 <Binary className="h-4 w-4 text-stone-500" />
-                <span>CONTRACT: 0xAaD7A38119EeE71CAC50ddf112d4E12fBB00026a</span>
+                <span>CONTRACT: {CALIBRATION_LEDGER_ADDRESS}</span>
               </div>
 
               <button

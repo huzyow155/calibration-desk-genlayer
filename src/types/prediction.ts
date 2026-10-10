@@ -1,4 +1,4 @@
-export type PredictionStatus = 'OPEN' | 'RESOLVED';
+export type PredictionStatus = 'OPEN' | 'PROVISIONAL' | 'SETTLED';
 export type PredictionOutcome = 'YES' | 'NO' | 'AMBIGUOUS';
 
 export interface PredictionRecord {
@@ -7,12 +7,19 @@ export interface PredictionRecord {
   forecaster: string;
   event_text: string;
   prob_bp: number;
-  deadline_hint: string;
-  created_at_round: string;
+  resolve_after: string;
+  source_url: string;
+  created_at?: string;
   status: PredictionStatus;
   outcome: PredictionOutcome | null;
-  resolution_evidence: string;
+  resolved_at?: string;
+  settled_at?: string;
   resolution_quote: string;
+  source_hash?: string;
+  contested?: boolean;
+  contested_at?: string;
+  contester?: string;
+  last_attempt?: string;
 }
 
 export interface CalibrationBucket {
@@ -27,6 +34,8 @@ export interface CalibrationReport {
   forecaster: string;
   n_registered: number;
   n_resolved: number;
+  n_provisional: number;
+  n_settled: number;
   n_scored: number;
   brier_score: number | null;
   buckets: CalibrationBucket[];

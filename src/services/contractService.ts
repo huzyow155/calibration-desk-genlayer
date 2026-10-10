@@ -134,24 +134,47 @@ export async function executeRegisterPrediction(
   writeClient: any,
   eventText: string,
   probBp: number,
-  deadlineHint: string
+  resolveAfter: string,
+  sourceUrl: string
 ): Promise<string> {
   return await writeClient.writeContract({
     address: CALIBRATION_LEDGER_ADDRESS,
     functionName: 'register_prediction',
-    args: [eventText, probBp, deadlineHint],
+    args: [eventText, probBp, resolveAfter, sourceUrl],
   });
 }
 
 export async function executeResolveEvent(
   writeClient: any,
-  predictionId: string,
-  evidenceText: string
+  predictionId: string
 ): Promise<string> {
   return await writeClient.writeContract({
     address: CALIBRATION_LEDGER_ADDRESS,
     functionName: 'resolve_event',
-    args: [predictionId, evidenceText],
+    args: [predictionId],
+  });
+}
+
+export async function executeContestResolution(
+  writeClient: any,
+  predictionId: string,
+  altSourceUrl = ''
+): Promise<string> {
+  return await writeClient.writeContract({
+    address: CALIBRATION_LEDGER_ADDRESS,
+    functionName: 'contest_resolution',
+    args: [predictionId, altSourceUrl],
+  });
+}
+
+export async function executeSettle(
+  writeClient: any,
+  predictionId: string
+): Promise<string> {
+  return await writeClient.writeContract({
+    address: CALIBRATION_LEDGER_ADDRESS,
+    functionName: 'settle',
+    args: [predictionId],
   });
 }
 

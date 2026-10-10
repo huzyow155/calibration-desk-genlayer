@@ -10,6 +10,8 @@ import {
   RefreshCw,
   Eye,
   Wallet,
+  Scale,
+  Clock,
 } from 'lucide-react';
 import { useWallet } from '../../context/WalletContext';
 import {
@@ -17,24 +19,28 @@ import {
   STUDIONET_EXPLORER_URL,
   DEMO_FORECASTER_A,
   DEMO_FORECASTER_B,
+  DEMO_FORECASTER_C,
 } from '../../config/chain';
 import {
   fetchCalibrationReport,
   fetchPrediction,
   fetchPredictionsByForecaster,
+  executeSettle,
+  waitForReceiptWithProgress,
 } from '../../services/contractService';
 import type { PredictionRecord, CalibrationReport } from '../../types/prediction';
 import { DecileHistogram } from './DecileHistogram';
 import { RegisterPredictionModal } from './RegisterPredictionModal';
 import { ResolveEventModal } from './ResolveEventModal';
+import { ContestModal } from './ContestModal';
 import { CouncilEndorsementSection } from './CouncilEndorsementSection';
 import { WaitingStateModal } from '../common/WaitingStateModal';
 
 export const AppWorkbench: React.FC = () => {
-  const { account } = useWallet();
+  const { account, writeClient } = useWallet();
 
   // Active address being inspected (defaults to Forecaster A)
-  const [selectedProfile, setSelectedProfile] = useState<'A' | 'B' | 'wallet' | 'custom'>('A');
+  const [selectedProfile, setSelectedProfile] = useState<'A' | 'B' | 'C' | 'wallet' | 'custom'>('A');
   const [targetAddress, setTargetAddress] = useState<string>(DEMO_FORECASTER_A.address);
   const [customInput, setCustomInput] = useState<string>('');
 
@@ -43,9 +49,17 @@ export const AppWorkbench: React.FC = () => {
   const [predictions, setPredictions] = useState<PredictionRecord[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  // Active timer for contest window countdown
+  const [nowMs, setNowMs] = useState(Date.now());
+  useEffect(() => {
+    const timer = setInterval(() => setNowMs(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
   // Modals state
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [selectedForResolve, setSelectedForResolve] = useState<PredictionRecord | null>(null);
+  const [selectedForContest, setSelectedForContest] = useState<PredictionRecord | null>(null);
   const [inspectPrediction, setInspectPrediction] = useState<PredictionRecord | null>(null);
 
   // Progress state
@@ -91,12 +105,14 @@ export const AppWorkbench: React.FC = () => {
   }, [targetAddress, loadForecasterData]);
 
   // Switch profile handler
-  const handleSelectProfile = (profile: 'A' | 'B' | 'wallet' | 'custom') => {
+  const handleSelectProfile = (profile: 'A' | 'B' | 'C' | 'wallet' | 'custom') => {
     setSelectedProfile(profile);
     if (profile === 'A') {
       setTargetAddress(DEMO_FORECASTER_A.address);
     } else if (profile === 'B') {
       setTargetAddress(DEMO_FORECASTER_B.address);
+    } else if (profile === 'C') {
+      setTargetAddress(DEMO_FORECASTER_C.address);
     } else if (profile === 'wallet' && account) {
       setTargetAddress(account);
     }
@@ -107,6 +123,41 @@ export const AppWorkbench: React.FC = () => {
     if (customInput.trim().startsWith('0x')) {
       setSelectedProfile('custom');
       setTargetAddress(customInput.trim());
+    }
+  };
+
+  const handleSettle = async (prediction: PredictionRecord) => {
+    if (!writeClient || !account) {
+      alert('Please connect your wallet first.');
+      return;
+    }
+
+    setProgressModal({
+      isOpen: true,
+      title: `Settling Prediction #${prediction.prediction_id}`,
+      stage: 'submitting',
+      elapsedSec: 0,
+    });
+
+    try {
+      const txHash = await executeSettle(writeClient, prediction.prediction_id);
+      setProgressModal((prev) => ({ ...prev, stage: 'consensus', txHash }));
+
+      const { success, durationSec, receipt } = await waitForReceiptWithProgress(
+        writeClient,
+        txHash,
+        (elapsed) => setProgressModal((prev) => ({ ...prev, stage: 'consensus', elapsedSec: elapsed }))
+      );
+
+      if (!success) {
+        throw new Error(`Settlement failed: ${receipt?.status_name}`);
+      }
+
+      setProgressModal((prev) => ({ ...prev, stage: 'success', elapsedSec: durationSec }));
+      loadForecasterData(targetAddress);
+    } catch (err: any) {
+      console.error('Settlement error:', err);
+      setProgressModal((prev) => ({ ...prev, stage: 'error', errorMessage: err.message || 'Settlement failed' }));
     }
   };
 
@@ -173,7 +224,7 @@ export const AppWorkbench: React.FC = () => {
           </div>
 
           {/* Preset Buttons */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
             {/* Forecaster A - Rose Accent (The Trap Case) */}
             <button
               onClick={() => handleSelectProfile('A')}
@@ -190,7 +241,7 @@ export const AppWorkbench: React.FC = () => {
                 </span>
               </div>
               <p className="mt-2 text-sm text-stone-400 font-light leading-snug">
-                Overconfident 9900 bp prediction that failed. Brier score severely penalized to 0.49505.
+                Overconfident 9900 bp call on failed catch. Quadratic penalty drives Brier score to 0.4913.
               </p>
             </button>
 
@@ -210,7 +261,27 @@ export const AppWorkbench: React.FC = () => {
                 </span>
               </div>
               <p className="mt-2 text-sm text-stone-400 font-light leading-snug">
-                Calibrated probabilities (1000 bp on NO, 8500 bp on YES). Pristine Brier score 0.01625.
+                Calibrated probabilities (1000 bp on NO, 9000 bp on YES). Pristine Brier score 0.0100.
+              </p>
+            </button>
+
+            {/* Forecaster C - Active / Contest Profile */}
+            <button
+              onClick={() => handleSelectProfile('C')}
+              className={`rounded-xl border p-4 text-left transition-all cursor-pointer ${
+                selectedProfile === 'C'
+                  ? 'border-[#9d4f72]/70 bg-[#9d4f72]/20 shadow-md'
+                  : 'border-white/8 bg-black/30 hover:border-white/20'
+              }`}
+            >
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold text-white text-sm">Forecaster C</span>
+                <span className="rounded bg-[#9d4f72]/30 border border-[#9d4f72]/50 px-2 py-0.5 text-[11px] font-mono text-[#f5d0fe]">
+                  CONTEST DEMO
+                </span>
+              </div>
+              <p className="mt-2 text-sm text-stone-400 font-light leading-snug">
+                Active resolution demonstrating the 300s contest window, re-evaluation, and settlement.
               </p>
             </button>
 
@@ -227,7 +298,7 @@ export const AppWorkbench: React.FC = () => {
               }`}
             >
               <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-white text-sm">My Connected Wallet</span>
+                <span className="font-bold text-white text-sm">My Wallet</span>
                 <Wallet className={`h-4 w-4 ${selectedProfile === 'wallet' ? 'text-[#f5d0fe]' : 'text-stone-400'}`} />
               </div>
               <p className="mt-2 text-sm text-stone-400 font-light leading-snug">
@@ -299,6 +370,10 @@ export const AppWorkbench: React.FC = () => {
                 const probPct = (p.prob_bp / 100).toFixed(2);
                 const isTrap = p.prob_bp >= 9900 && p.outcome === 'NO';
 
+                const resolvedMs = p.resolved_at ? new Date(p.resolved_at).getTime() : 0;
+                const contestRemainingSec = Math.max(0, Math.round((resolvedMs + 300000 - nowMs) / 1000));
+                const isProvisional = p.status === 'PROVISIONAL';
+
                 return (
                   <div
                     key={p.prediction_id}
@@ -306,14 +381,38 @@ export const AppWorkbench: React.FC = () => {
                   >
                     {/* Left: ID & Question */}
                     <div className="space-y-1.5 flex-1">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         {/* Prediction ID with Violet Accent */}
                         <span className="font-mono text-xs font-bold text-[#f5d0fe]">
                           #{p.prediction_id}
                         </span>
-                        <span className="text-[11px] font-mono text-stone-400">
-                          ROUND {p.created_at_round}
-                        </span>
+
+                        {/* Status Badge */}
+                        {p.status === 'OPEN' && (
+                          <span className="rounded bg-[#9d4f72]/20 border border-[#9d4f72]/40 px-2 py-0.5 text-[10px] font-mono font-semibold text-[#f5d0fe]">
+                            OPEN
+                          </span>
+                        )}
+                        {isProvisional && (
+                          <span className="inline-flex items-center gap-1 rounded bg-[#d98c4f]/20 border border-[#d98c4f]/40 px-2 py-0.5 text-[10px] font-mono font-semibold text-[#fed7aa]">
+                            <Clock className="w-3 h-3" />
+                            <span>
+                              PROVISIONAL {contestRemainingSec > 0 ? `(${contestRemainingSec}s window)` : '(window closed)'}
+                            </span>
+                          </span>
+                        )}
+                        {p.status === 'SETTLED' && (
+                          <span className="rounded bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 text-[10px] font-mono font-semibold text-emerald-300">
+                            SETTLED
+                          </span>
+                        )}
+
+                        {p.contested && (
+                          <span className="rounded bg-[#ad355b]/30 border border-[#ad355b]/50 px-2 py-0.5 text-[10px] font-mono font-bold text-[#ffb3c6]">
+                            CONTESTED
+                          </span>
+                        )}
+
                         {isTrap && (
                           <span className="rounded bg-[#8c1320]/40 border border-[#ad355b]/50 px-2 py-0.5 text-[10px] font-mono font-bold text-[#ffb3c6]">
                             TRAP PENALTY CASE
@@ -323,9 +422,12 @@ export const AppWorkbench: React.FC = () => {
                       <p className="text-base font-semibold text-white leading-snug">
                         {p.event_text}
                       </p>
+                      <div className="text-xs text-stone-400 font-mono truncate">
+                        Source: <span className="text-stone-300">{p.source_url}</span>
+                      </div>
                     </div>
 
-                    {/* Middle: Stated Probability & Status */}
+                    {/* Middle: Stated Probability & Outcome */}
                     <div className="flex items-center gap-6 text-xs font-mono">
                       <div>
                         <span className="text-stone-400 block text-[11px]">PROBABILITY</span>
@@ -335,7 +437,7 @@ export const AppWorkbench: React.FC = () => {
 
                       <div>
                         <span className="text-stone-400 block text-[11px]">OUTCOME</span>
-                        {p.status === 'RESOLVED' ? (
+                        {p.outcome ? (
                           <span
                             className={`inline-flex items-center gap-1 font-bold text-sm ${
                               p.outcome === 'YES'
@@ -348,13 +450,13 @@ export const AppWorkbench: React.FC = () => {
                             {p.outcome}
                           </span>
                         ) : (
-                          <span className="text-[#f5d0fe] font-semibold text-sm">OPEN</span>
+                          <span className="text-stone-500 font-semibold text-sm">PENDING</span>
                         )}
                       </div>
                     </div>
 
                     {/* Right: Actions */}
-                    <div className="flex items-center gap-2 pt-2 md:pt-0">
+                    <div className="flex items-center gap-2 pt-2 md:pt-0 flex-wrap">
                       <button
                         onClick={() => setInspectPrediction(p)}
                         className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-stone-300 hover:text-white transition-colors cursor-pointer"
@@ -370,6 +472,26 @@ export const AppWorkbench: React.FC = () => {
                         >
                           <CheckCircle2 className="h-3.5 w-3.5" />
                           <span>Resolve</span>
+                        </button>
+                      )}
+
+                      {isProvisional && contestRemainingSec > 0 && !p.contested && (
+                        <button
+                          onClick={() => setSelectedForContest(p)}
+                          className="inline-flex items-center gap-1 rounded-lg border border-[#ad355b]/50 bg-[#ad355b]/20 hover:bg-[#ad355b] px-3.5 py-1.5 text-xs font-semibold text-rose-200 hover:text-white transition-colors shadow-sm cursor-pointer"
+                        >
+                          <Scale className="h-3.5 w-3.5" />
+                          <span>Contest</span>
+                        </button>
+                      )}
+
+                      {isProvisional && contestRemainingSec === 0 && (
+                        <button
+                          onClick={() => handleSettle(p)}
+                          className="inline-flex items-center gap-1 rounded-lg bg-[#d98c4f] hover:bg-[#b8632e] px-3.5 py-1.5 text-xs font-semibold text-white transition-colors shadow-sm cursor-pointer"
+                        >
+                          <CheckCircle2 className="h-3.5 w-3.5" />
+                          <span>Settle</span>
                         </button>
                       )}
                     </div>
@@ -460,10 +582,37 @@ export const AppWorkbench: React.FC = () => {
         }}
       />
 
+      <ContestModal
+        isOpen={Boolean(selectedForContest)}
+        onClose={() => setSelectedForContest(null)}
+        prediction={selectedForContest}
+        onSuccess={() => {
+          setSelectedForContest(null);
+          loadForecasterData(targetAddress);
+        }}
+        onStartProgress={(title) => {
+          setProgressModal({
+            isOpen: true,
+            title,
+            stage: 'submitting',
+            elapsedSec: 0,
+          });
+        }}
+        onUpdateProgress={(stage, elapsed, txHash, error) => {
+          setProgressModal((prev) => ({
+            ...prev,
+            stage,
+            elapsedSec: elapsed,
+            txHash,
+            errorMessage: error,
+          }));
+        }}
+      />
+
       {/* Deep Inspection Modal */}
       {inspectPrediction && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="relative w-full max-w-lg rounded-2xl border border-white/10 bg-[#121418] p-6 sm:p-8 shadow-2xl space-y-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+          <div className="relative w-full max-w-lg rounded-2xl border border-white/10 bg-[#121418] p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <div>
                 <span className="text-xs font-mono tracking-widest text-stone-400 uppercase">
@@ -505,28 +654,66 @@ export const AppWorkbench: React.FC = () => {
                       ? 'text-[#ad355b]'
                       : 'text-white'
                   }`}>
-                    {inspectPrediction.outcome || 'OPEN'}
+                    {inspectPrediction.outcome || 'PENDING'}
                   </span>
                 </div>
               </div>
 
-              {inspectPrediction.resolution_evidence && (
-                <div className="rounded-xl border border-white/8 bg-black/40 p-3.5 space-y-2">
-                  <div className="flex items-center justify-between text-[11px] font-mono text-stone-400">
-                    <span>EVIDENCE TEXT</span>
-                    <span className="text-[#d98c4f]">QUOTE: {inspectPrediction.resolution_quote}</span>
-                  </div>
-                  <p className="text-stone-300 leading-relaxed font-light text-sm">
-                    "{inspectPrediction.resolution_evidence}"
-                  </p>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-xl border border-white/8 bg-black/40 p-3 font-mono">
+                  <span className="text-[11px] text-stone-400 uppercase block">STATUS</span>
+                  <span className="text-sm font-bold text-[#f5d0fe]">{inspectPrediction.status}</span>
+                </div>
+
+                <div className="rounded-xl border border-white/8 bg-black/40 p-3 font-mono">
+                  <span className="text-[11px] text-stone-400 uppercase block">CONTESTED</span>
+                  <span className={`text-sm font-bold ${inspectPrediction.contested ? 'text-[#ffb3c6]' : 'text-stone-300'}`}>
+                    {inspectPrediction.contested ? 'YES (Contested)' : 'NO'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-white/8 bg-black/40 p-3.5 space-y-2">
+                <div className="flex items-center justify-between text-[11px] font-mono text-stone-400">
+                  <span>COMMITTED SOURCE URL</span>
+                  <span className="text-[#d98c4f]">QUOTE: {inspectPrediction.resolution_quote || 'NONE'}</span>
+                </div>
+                <div className="flex items-center justify-between gap-2 text-stone-300 font-mono text-xs break-all">
+                  <span className="truncate">{inspectPrediction.source_url}</span>
+                  <a
+                    href={inspectPrediction.source_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="p-1 text-stone-400 hover:text-white shrink-0"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              </div>
+
+              {inspectPrediction.source_hash && (
+                <div className="rounded-xl border border-white/8 bg-black/40 p-3 font-mono text-[11px]">
+                  <span className="text-stone-400 uppercase block mb-1">SOURCE SNAPSHOT SHA-256</span>
+                  <span className="text-stone-300 break-all">{inspectPrediction.source_hash}</span>
                 </div>
               )}
+
+              <div className="grid grid-cols-2 gap-3 font-mono text-[11px] text-stone-400">
+                <div>
+                  <span className="block uppercase text-stone-500">RESOLVE AFTER</span>
+                  <span>{inspectPrediction.resolve_after || 'N/A'}</span>
+                </div>
+                <div>
+                  <span className="block uppercase text-stone-500">RESOLVED AT</span>
+                  <span>{inspectPrediction.resolved_at || 'Pending'}</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Waiting State Modal */}
+      {/* Waiting Progress Modal */}
       <WaitingStateModal
         isOpen={progressModal.isOpen}
         title={progressModal.title}
