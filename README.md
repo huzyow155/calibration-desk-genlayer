@@ -31,9 +31,9 @@ Accuracy alone rewards the wrong behavior: a forecaster who predicts "whatever i
 
 2. **Calibration Desk Workbench (`/app`)**:
    - **Persistent On-Chain Showcase**: Immediate no-wallet access to existing on-chain forecaster records:
-     - **Forecaster A (Trap Case Demo)**: `0xDE0fbC71F750b591C8703A9C0080EA79a533ff41` (FOMC rate cut & Starship Flight 6 trap case, Brier `0.4913`).
-     - **Forecaster B (Well-Calibrated Demo)**: `0x13981fbbd3E42bf2D6170121ab9E0038CD4fEc46` (Project Meridian & ECB rate decision, Brier `0.0100`).
-      - **Forecaster C (Contested Demo)**: `0xb487065c4D3c3FB2d5065662fC5f90590917a041` (Candidate Davis election forecast, contested in 300s window).
+     - **Forecaster A (Trap Case Demo)**: `0xDE0fbC71F750b591C8703A9C0080EA79a533ff41` (Apollo 11 landing ID `53f6d83d16df` & Falcon 9 maiden launch trap case ID `86ee08dcfee2`, Brier `0.4913`).
+     - **Forecaster B (Well-Calibrated Demo)**: `0x13981fbbd3E42bf2D6170121ab9E0038CD4fEc46` (Falcon 9 Boeing verification ID `5a7753c28378` & JWST infrared purpose ID `37b05c2ee6b2`, Brier `0.0100`).
+      - **Forecaster C (Contested Demo)**: `0xb487065c4D3c3FB2d5065662fC5f90590917a041` (Apollo 11 Columbia return ID `3393c1ce5063`, contested in 300s window).
    - **Interactive Decile Histogram**: Visual calibration curve showing actual hit rate vs expected probability line across 10 confidence deciles.
    - **Wallet Connection**: EIP-6963 multi-wallet discovery and standard injected wallet support.
    - **Register Prediction**: Submit future event statements, probability in basis points (1..9999 bp), ISO-8601 UTC resolve deadline (resolve_after), and allowlisted source URL.

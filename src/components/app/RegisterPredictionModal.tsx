@@ -271,7 +271,7 @@ export const RegisterPredictionModal: React.FC<RegisterPredictionModalProps> = (
                 type="url"
                 value={sourceUrl}
                 onChange={(e) => setSourceUrl(e.target.value)}
-                placeholder="https://raw.githubusercontent.com/... or https://reuters.com/..."
+                placeholder="https://en.wikipedia.org/... or https://reuters.com/..."
                 className="w-full px-3.5 py-2.5 bg-[#0b0c0e] border border-[#2b2d35] rounded-lg text-white text-base focus:outline-none focus:border-[#9d4f72] transition-colors"
                 required
               />
